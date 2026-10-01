@@ -157,6 +157,7 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--policy", choices=["human", "oracle", "model", "gemini"], default="human")
     ap.add_argument("--gemini_model", default="gemini-flash-lite-latest")
+    ap.add_argument("--gemini_prompt", choices=["minimal", "rules", "procedure", "cot"], default="procedure")
     ap.add_argument("--seed", type=int, default=1000)
     ap.add_argument("--episodes", type=int, default=0, help="auto policies: stop after N jumps (0 = until q)")
     ap.add_argument("--fps", type=float, default=3.0, help="auto policies: ticks per second")
@@ -173,7 +174,7 @@ def main():
     gp = None
     if args.policy == "gemini":
         from model.llm_policy import GeminiPolicy, PRICES
-        gp = GeminiPolicy(args.gemini_model, thinking=None)
+        gp = GeminiPolicy(args.gemini_model, thinking=None, prompt=args.gemini_prompt)
         price = PRICES.get(args.gemini_model, (0.0, 0.0))
     who = {"human": "you", "oracle": "the rule (oracle)", "model": f"Kev @ {args.url}", "gemini": f"Gemini ({args.gemini_model}), one API call per tick"}[args.policy]
     st = {"seed": args.seed, "wins": 0, "n": 0, "who": who, "hint": None, "probs": None, "last": None, "banner": None,

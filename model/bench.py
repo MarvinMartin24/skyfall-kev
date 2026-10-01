@@ -49,9 +49,9 @@ class KevPlayer:
 
 
 class GeminiPlayer:
-    def __init__(self, model, price_in, price_out, thinking=None):
+    def __init__(self, model, price_in, price_out, thinking=None, prompt="procedure"):
         from model.llm_policy import GeminiPolicy
-        self.p = GeminiPolicy(model, thinking=thinking)
+        self.p = GeminiPolicy(model, thinking=thinking, prompt=prompt)
         self.name, self.price = self.p.name, (price_in, price_out)
 
     def decide(self, w):
@@ -69,7 +69,7 @@ def make_player(spec, args):
         model = spec.split(":", 1)[1] if ":" in spec else "gemini-3.8-flash"
         pin, pout = (args.price_in, args.price_out) if args.price_in is not None else PRICES.get(model, (0.0, 0.0))
         thinking = {"none": None, "budget0": {"thinkingBudget": 0}, "minimal": {"thinkingLevel": "minimal"}, "low": {"thinkingLevel": "low"}}[args.gemini_thinking]
-        return GeminiPlayer(model, pin, pout, thinking)
+        return GeminiPlayer(model, pin, pout, thinking, args.gemini_prompt)
     raise SystemExit(f"unknown player {spec}")
 
 
@@ -126,7 +126,8 @@ def main():
     ap.add_argument("--surprise", action="store_true")
     ap.add_argument("--kev_price", choices=["local", "jev"], default="jev", help="price Kev tokens at 0 (local) or at Jev's list price")
     ap.add_argument("--price_in", type=float, default=None); ap.add_argument("--price_out", type=float, default=None)
-    ap.add_argument("--gemini_thinking", choices=["none", "budget0", "minimal", "low"], default="minimal", help="thinkingConfig sent to Gemini")
+    ap.add_argument("--gemini_thinking", choices=["none", "budget0", "minimal", "low"], default="none", help="thinkingConfig sent to Gemini")
+    ap.add_argument("--gemini_prompt", choices=["minimal", "rules", "procedure", "cot"], default="procedure")
     ap.add_argument("--out", default="results/race")
     args = ap.parse_args()
     seeds = list(range(args.seed, args.seed + args.episodes))

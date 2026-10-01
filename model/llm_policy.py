@@ -14,13 +14,73 @@ import urllib.request
 
 from data.questions import QUESTIONS
 
-PROMPT = """You control the skydiver Y in this text grid. Everything scrolls UP one row per tick.
+PROMPT_MINIMAL = """You control the skydiver Y in this text grid. Everything scrolls UP one row per tick.
 {state}
 
 Question move: {move_q}
 Question open: {open_q}
 
 Reply with ONLY a JSON object: {{"move": "left" | "right" | "stay", "open": true | false}}"""
+
+RULES = """You are playing a tiny skydiving game on a grid with 5 columns (c0..c4, left to right) and 6 rows (row0 at the top, row5 at the bottom).
+Rules:
+- You are Y and you are always on row1.
+- Every tick, everything except you scrolls UP by one row: whatever is on row2 now will be on row1 (your row) next tick.
+- Letters B (bird), P (other skydiver), A (airplane) and any other letter are deadly if they reach your cell. C is a cloud and is harmless: you fly straight through it.
+- Each tick you choose move = left, right or stay (one column at most; the grid edges clamp you). Your move happens BEFORE the scroll.
+  You survive the tick only if, after your move, the cell on row1 and the cell on row2 in your column are both '.' or 'C'.
+- Open the parachute (open = true) only when altitude <= 1000 m AND the cell directly below you (row2, your column) is '.' or 'C'.
+  Opening above 1000 m loses. Opening with something deadly directly below loses. Reaching 0 m without opening loses.
+  Altitude drops 100 m per tick."""
+
+PROCEDURE = """Decision procedure, follow it exactly:
+1. Find the column c of Y on row1.
+2. Look at row2, column c (directly below you). If it is '.' or 'C': move = stay.
+   Otherwise move sideways to a neighbouring column c' (c-1 or c+1, inside c0..c4) where BOTH row1[c'] and row2[c'] are '.' or 'C'.
+   If both neighbours are safe, prefer the one closer to the centre column c2. If neither neighbour is safe: stay.
+3. open = true only if altitude <= 1000 AND row2[c] is '.' or 'C'. Otherwise open = false."""
+
+PROMPT_RULES = RULES + """
+
+Current state:
+{labeled}
+
+Reply with ONLY a JSON object: {{"move": "left" | "right" | "stay", "open": true | false}}"""
+
+PROMPT_PROCEDURE = RULES + "\n\n" + PROCEDURE + """
+
+Current state:
+{labeled}
+
+Reply with ONLY a JSON object: {{"move": "left" | "right" | "stay", "open": true | false}}"""
+
+PROMPT_COT = RULES + "\n\n" + PROCEDURE + """
+
+Current state:
+{labeled}
+
+Reply with ONLY a JSON object with three fields, in this order:
+"analysis": one or two sentences applying the procedure (Y's column, what is directly below it, what the neighbouring columns hold on row1 and row2, the altitude check),
+"move": "left" | "right" | "stay",
+"open": true | false"""
+
+PROMPTS = {"minimal": PROMPT_MINIMAL, "rules": PROMPT_RULES, "procedure": PROMPT_PROCEDURE, "cot": PROMPT_COT}
+
+
+def labeled_grid(state):
+    """The same state with row/column labels, for the LLM only (Kev sees the raw grid)."""
+    lines = state.split("\n")
+    out = [lines[0] + " m", "       c0 c1 c2 c3 c4"]
+    notes = {1: "   <- your row (Y)", 2: "   <- directly below you"}
+    for i, row in enumerate(lines[1:]):
+        out.append(f"row{i}:  " + "  ".join(row.split(" ")) + notes.get(i, ""))
+    return "\n".join(out)
+
+
+def build_prompt(name, state):
+    return PROMPTS[name].format(state=state, labeled=labeled_grid(state),
+                                move_q=QUESTIONS["move"]["instructions"], open_q=QUESTIONS["open"]["instructions"])
+
 
 # USD per million tokens. Override with --price_in/--price_out if your plan differs.
 PRICES = {                            # list prices found 2026-09-30; check ai.google.dev/pricing before quoting
@@ -63,29 +123,35 @@ def parse_answer(text):
 class GeminiPolicy:
     """One generateContent call per tick, JSON-constrained output, thinking off (fastest honest setting)."""
 
-    def __init__(self, model="gemini-3.8-flash", thinking=None, timeout=60):
+    def __init__(self, model="gemini-3.8-flash", thinking=None, timeout=60, prompt="procedure"):
         """thinking: the thinkingConfig dict sent to the API, e.g. {"thinkingBudget": 0} (Gemini 2.x) or
-        {"thinkingLevel": "minimal"} (Gemini 3.x); None sends no thinkingConfig at all."""
+        {"thinkingLevel": "minimal"} (Gemini 3.x); None sends no thinkingConfig at all.
+        prompt: one of PROMPTS ("minimal" = two bare questions, "rules" = full rules + labeled grid,
+        "procedure" = rules + the decision procedure spelled out)."""
         load_dotenv()
+        self.prompt = prompt
         self.key = os.environ.get("GEMINI_API_KEY")
         if not self.key:
             raise SystemExit("GEMINI_API_KEY is not set (export it, or put it in .env)")
         self.model, self.timeout = model, timeout
+        props = {"move": {"type": "STRING", "enum": ["left", "right", "stay"]}, "open": {"type": "BOOLEAN"}}
+        order = ["move", "open"]
+        if prompt == "cot":                      # a visible reasoning field, written before the answer
+            props = {"analysis": {"type": "STRING"}, **props}
+            order = ["analysis", "move", "open"]
         self.gen_cfg = {"responseMimeType": "application/json",
-                        "responseSchema": {"type": "OBJECT", "properties": {"move": {"type": "STRING", "enum": ["left", "right", "stay"]},
-                                                                             "open": {"type": "BOOLEAN"}}, "required": ["move", "open"]},
+                        "responseSchema": {"type": "OBJECT", "properties": props, "required": order, "propertyOrdering": order},
                         "temperature": 0}
         if thinking:
             self.gen_cfg["thinkingConfig"] = thinking
         self.thinking = thinking
-        self.name = f"gemini:{model}" + (f":{'/'.join(str(v) for v in thinking.values())}" if thinking else "")
+        self.name = f"gemini:{model}" + (f":{'/'.join(str(v) for v in thinking.values())}" if thinking else "") + f":{prompt}"
 
     def __call__(self, w):
         return self.decide(w.render())["action"]
 
     def decide(self, state, retries=6):
-        body = {"contents": [{"role": "user", "parts": [{"text": PROMPT.format(
-            state=state, move_q=QUESTIONS["move"]["instructions"], open_q=QUESTIONS["open"]["instructions"])}]}],
+        body = {"contents": [{"role": "user", "parts": [{"text": build_prompt(self.prompt, state)}]}],
                 "generationConfig": self.gen_cfg}
         url = f"https://generativelanguage.googleapis.com/v1beta/models/{self.model}:generateContent"
         t_wall = time.perf_counter()
