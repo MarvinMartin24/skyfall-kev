@@ -4,10 +4,15 @@ A tiny grid skydiving game used to fine-tune a Kev decision model
 (open reimplementation of TypeSafe's Jev) on one GPU, for a 30-minute demo.
 Plan and rules: [PLAN.md](PLAN.md).
 
-Play it yourself (from the repo folder, or by path from anywhere):
+Play it yourself (from the repo folder, or by path from anywhere). In-place
+terminal UI, single keys: `a`/`←` left, `d`/`→` right, enter stay, space open,
+`h` shows what the rule would do, `r` next jump, `q` quit.
 
 ```bash
-python3 skyfall.py            # a = left, d = right, enter = stay, add o to open (e.g. "ao")
+python3 skyfall.py                                  # you play
+python3 skyfall.py --policy oracle --fps 4          # watch the rule play
+python3 skyfall.py --policy model --fps 2           # watch the fine-tuned model, with live probability bars (needs kev.serve on :8009)
+python3 skyfall.py --policy model --fps 2 --surprise   # ...with the balloon it never saw
 ```
 
 ```bash
