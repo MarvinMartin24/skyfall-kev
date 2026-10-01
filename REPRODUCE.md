@@ -16,8 +16,14 @@ git clone https://github.com/MarvinMartin24/skyfall-kev.git
 cd skyfall-kev
 export SKY="$PWD"
 git clone https://github.com/jaredpalmer/kev.git ../kev   # tested at commit 1d77363
-cd ../kev && uv sync --extra serve && export KEV="$PWD" && cd "$SKY"
+cd ../kev && git apply "$SKY/patches/kev-lora-snapshots.diff"   # adds --lora_snapshot_every (periodic loadable LoRA checkpoints)
+uv sync --extra serve && export KEV="$PWD" && cd "$SKY"
 ```
+
+The patch is 12 lines: it reuses Kev's own final-save code (adapter, `head.pt`,
+tokenizer) every N optimizer steps into `runs/<run>-snapshots/step-<N>/`, each
+of which `kev.serve` and `kev.benchmark` load like any run. We use it for the
+"model at step 100 / 500 / 2500" montage in the demo.
 
 ## 1. Game and oracle (seconds)
 
@@ -71,7 +77,14 @@ which runs
 cd "$KEV" && uv run python -m kev.train \
   --data "$SKY/data/train.jsonl" --init_from jaredpalmer/kev-0.8b --base Qwen/Qwen3.5-0.8B-Base \
   --epochs 1 --lr 2e-5 --batch 4 --accum 2 --device mps --dtype fp32 \
-  --out "$SKY/runs/skyfall-0.8b"
+  --lora_snapshot_every 100 --out "$SKY/runs/skyfall-0.8b"
+```
+
+Play any snapshot while training continues (one server per snapshot, pick a port):
+
+```bash
+cd "$KEV" && uv run --no-sync python -m kev.serve --run "$SKY/runs/skyfall-0.8b-snapshots/step-100" --port 8010 &
+cd "$SKY" && python3 skyfall.py --policy model --url http://127.0.0.1:8010 --fps 2
 ```
 
 `--dtype bf16` is CUDA-only in `kev.train`; see `colab/train.sh` for the GPU form.

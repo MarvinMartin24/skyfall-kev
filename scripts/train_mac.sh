@@ -18,4 +18,5 @@ echo "train -> $OUT (log: $OUT.log)"
   --base Qwen/Qwen3.5-0.8B-Base --base_revision dc7cdfe2ee4154fa7e30f5b51ca41bfa40174e68 \
   --epochs 1 --lr 2e-5 --batch 4 --accum 2 \
   --device mps --dtype fp32 \
+  --lora_snapshot_every 100 \
   --out "$OUT" "$@" ; } 2>&1 | tee "$OUT.log"
