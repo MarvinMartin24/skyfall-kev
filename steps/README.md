@@ -7,8 +7,8 @@ fails acceptance, the step is redone and the file says so.
 | # | Step | Status |
 |---|---|---|
 | 01 | [Game and oracle](01-game.md) | **done**, reviewed (accept), fixes applied |
-| 02 | [Dataset and schema check](02-data.md) | **done**, loads in Kev, review pending |
-| 03 | [Zero-shot baseline](03-baseline.md) | running |
+| 02 | [Dataset and schema check](02-data.md) | **done**, reviewed (accept), v4 with clouds |
+| 03 | [Zero-shot baseline](03-baseline.md) | **done**: move 0.55, open 0.47, Brier 0.57 |
 | 04 | [Fine-tune](04-train.md) | running (M2 Max, mps) |
 | 05 | [Evaluate, play, surprise obstacle](05-evaluate.md) | todo |
 | 06 | [Latency: decision model vs generation](06-latency.md) | todo |

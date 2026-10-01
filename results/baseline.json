@@ -1,0 +1,18 @@
+{
+ "run": "jaredpalmer/kev-0.8b",
+ "data": "data/eval.jsonl (v4, 2000 states, 4000 questions)",
+ "device": "mps/torch fp32 (shared with training)",
+ "move_acc": 0.554,
+ "move_brier": 0.6261757615668878,
+ "move_nll": 1.0367908844870413,
+ "open_acc": 0.467,
+ "open_brier": 0.5062338974896226,
+ "open_nll": 0.6993473238194008,
+ "overall_acc": 0.5105,
+ "overall_brier": 0.5662048295282551,
+ "ece": 0.11679573566736628,
+ "mean_confidence": 0.4607763448506731,
+ "latency_ms_median": 724.403333500959,
+ "latency_ms_p95": 981.502449430991,
+ "inference_temperature": 2.3510958125672174
+}
