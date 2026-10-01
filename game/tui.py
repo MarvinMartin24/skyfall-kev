@@ -14,7 +14,7 @@ import termios
 import time
 import tty
 
-from game.sim import World, WIDTH, PLAYER_ROW, EMPTY, PLAYER, DEAD, OPEN_ALT, START_ALT
+from game.sim import World, WIDTH, HEIGHT, PLAYER_ROW, EMPTY, PLAYER, DEAD, OPEN_ALT, START_ALT, ALT_STEP
 from game.oracle import oracle
 
 E = "\x1b["
@@ -57,12 +57,27 @@ class Keys:
         return ch
 
 
-def cell(ch, emoji):
+GROUND_BG = E + "42m"      # green background: the ground, drawn under whatever is in those rows
+
+
+def cell(ch, emoji, ground=False):
     if emoji:
+        if ground:
+            return "🟩 " if ch == EMPTY else EMOJI[ch] + " "
         return (EMOJI[ch] + " ") if ch in EMOJI else " · "
+    if ground:
+        return GROUND_BG + (E + "30m" + "▒▒▒" if ch == EMPTY else E + "30;1m" + f" {ch} ") + RESET
     if ch == EMPTY:
         return DIM + " · " + RESET
     return COLOR.get(ch, "") + BOLD + f" {ch} " + RESET
+
+
+def ground_row(w):
+    """First grid row that is ground (visual only; the model never sees this). Each row below the
+    skydiver is 100 m lower, so the ground enters the bottom row at 400 m and reaches the cell
+    under Y at 0 m, exactly when the jump ends."""
+    r = PLAYER_ROW + 1 + w.alt // ALT_STEP
+    return r if r < HEIGHT else None
 
 
 def bar(p, n=12, color=""):
@@ -73,11 +88,12 @@ def bar(p, n=12, color=""):
 def frame(w, st, emoji):
     inner = 3 * WIDTH
     rows = []
+    g = ground_row(w)
     for r, row in enumerate(w.grid):
         cells = list(row)
         if r == PLAYER_ROW:
             cells[w.col] = PLAYER if row[w.col] == EMPTY else DEAD
-        rows.append("│" + "".join(cell(c, emoji) for c in cells) + "│")
+        rows.append("│" + "".join(cell(c, emoji, ground=g is not None and r >= g) for c in cells) + "│")
     grid = ["┌" + "─" * inner + "┐"] + rows + ["└" + "─" * inner + "┘"]
 
     low = w.alt <= OPEN_ALT
@@ -85,6 +101,7 @@ def frame(w, st, emoji):
     hud = [f"{BOLD}SKYFALL{RESET}  seed {st['seed']}   tick {w.ticks:2d}   wins {st['wins']}/{st['n']}",
            f"altitude {alt_col}{w.alt:5d} m{RESET}  {bar(w.alt / START_ALT, 15, alt_col).rsplit(' ', 1)[0]}",
            (E + "1;32m" + "OPEN ZONE: at or below 1000 m" + RESET) if low else (DIM + f"open zone starts at {OPEN_ALT} m" + RESET),
+           (E + "1;33m" + f"GROUND in {w.alt} m ({w.alt // ALT_STEP} ticks)" + RESET) if g is not None and w.alt > 0 else "",
            f"player: {st['who']}"]
     if st.get("last"):
         a = st["last"]
@@ -105,7 +122,7 @@ def frame(w, st, emoji):
     for i in range(max(len(grid), len(hud))):
         left = grid[i] if i < len(grid) else " " * (inner + 2)
         lines.append(left + "   " + (hud[i] if i < len(hud) else ""))
-    legend = "   ".join(f"{COLOR[c]}{c}{RESET} {NAME[c]}" for c in ("B", "P", "A")) + ("   " + COLOR["O"] + "O" + RESET + " balloon (never seen in training)" if w.surprise else "")
+    legend = "   ".join(f"{COLOR[c]}{c}{RESET} {NAME[c]}" for c in ("B", "P", "A")) + ("   " + COLOR["O"] + "O" + RESET + " balloon (never seen in training)" if w.surprise else "") + "   " + GROUND_BG + E + "30m" + "▒" + RESET + " ground (visual only, 100 m per row)"
     keys = "a/← left   d/→ right   enter stay   space open   h hint   r replay   q quit" if st["who"] == "you" else "q quit   r next seed"
     return "\n".join(["", *lines, "", legend, DIM + keys + RESET, ""])
 
