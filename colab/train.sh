@@ -18,11 +18,14 @@ export RUNS=/content/drive/MyDrive/skyfall-runs
 uv run python -m kev.benchmark --run jaredpalmer/kev-0.8b --data $SKY/data/eval.jsonl --out $RUNS/base-eval --device cuda
 
 # 4. Fine-tune (0.8B, ~20 min on an H100; longer on an L4). No validation split: evaluate afterwards.
+#    "delta mode": --init_from warm-starts the LoRA and pointer head from the released checkpoint.
+#    --base must be the backbone the released checkpoint was trained on: Qwen/Qwen3.5-0.8B-Base
+#    (from https://huggingface.co/jaredpalmer/kev-0.8b/raw/main/training_config.json; it used lora 16, lr 2e-5, batch 4, accum 2).
+#    --dtype bf16 is CUDA-only in kev.train; on a Mac use --device mps --dtype fp32 (see REPRODUCE.md).
 uv run python -m kev.train --data $SKY/data/train.jsonl --init_from jaredpalmer/kev-0.8b \
-  --base Qwen/Qwen3.5-0.8B-Base --epochs 2 --lr 5e-5 --batch 4 --accum 2 \
-  --dtype bf16 --device cuda --out $RUNS/skyfall-0.8b
-#    If memory is tight on an L4: --batch 1 --accum 8 --checkpointing 1
-#    Check --base matches what kev-0.8b was trained on (see its training_config.json on the Hub) before running.
+  --base Qwen/Qwen3.5-0.8B-Base --epochs 1 --lr 2e-5 --batch 4 --accum 2 \
+  --dtype bf16 --device cuda --checkpointing 1 --out $RUNS/skyfall-0.8b
+#    If memory is tight on an L4: --batch 1 --accum 8
 
 # 5. Evaluate the fine-tune the same way
 uv run python -m kev.benchmark --run $RUNS/skyfall-0.8b --data $SKY/data/eval.jsonl --out $RUNS/ft-eval --device cuda
