@@ -1,0 +1,24 @@
+rows = oracle, cols = model
+            left  right   stay
+true  left:    54      0      0
+true right:     0     95      1
+true  stay:     0      1    149
+open errors: {'false_open': 0, 'missed_open': 0} | move errors: 2 of 300
+
+--- oracle right, model stay (left 0.00, right 0.01, stay 0.99)
+altitude: 1000
+. . . C P
+. . P Y .
+. . C P .
+. A . C .
+. . . . .
+. . B . C
+
+--- oracle stay, model right (left 0.00, right 0.96, stay 0.04)
+altitude: 1000
+. . A . .
+. . C B Y
+. . . . A
+. . . . C
+B . . . .
+. . . . .

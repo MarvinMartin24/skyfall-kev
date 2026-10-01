@@ -210,4 +210,29 @@ One infrastructure note for honesty: the snapshot server stuck on step 900
 for an hour because a text sort put `step-900` after `step-1300`. The
 skipped snapshots were backfilled on a side port; the curve is complete.
 
-_(continued as results land: final model, the full race)_
+## 10. The final model (Oct 1, 05:30)
+
+One epoch, 2,500 steps, 5.8 hours on the laptop, loss at zero for the last
+third. The final checkpoint is 62 MB: a rank-16 LoRA adapter, the pointer
+head and a tokenizer.
+
+| | released Kev | final fine-tune | oracle |
+|---|---|---|---|
+| move accuracy, held-out | 0.55 | 0.993 (2 errors in 300) | 1 |
+| open accuracy, held-out | 0.47 | 1.000 | 1 |
+| live jumps won, 100 seeds | 0 | 94 | 97 |
+| same seeds with balloons | 0 | 83 | 97 |
+
+The two remaining move errors are both at exactly 1,000 m with something
+deadly below, the one altitude where the open and move rules interact.
+
+**The balloon, final answer.** 83 of 100 with a symbol the model never saw,
+14 deaths by balloon. The probe explains it: P(stay) with one symbol under
+`Y` is 0.00 for `B`, `P`, `A`, and also 0.00 for `Z` and `X`, letters it never
+saw; but 0.33 for `O` and 0.61 for the digit `0`. It learned "any other
+letter is deadly" and applies it to new letters, and it also learned that
+round, hollow glyphs look like empty cells. Of all the symbols we could have
+picked for the surprise, the balloon was the one that looks like a hole.
+Had we chosen `Z`, the test would have passed cleanly. That is the slide.
+
+_(continued: the full race and latency on an idle GPU)_

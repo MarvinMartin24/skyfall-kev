@@ -1,0 +1,8 @@
+win_rate=0.940 mean_ticks=20.8
+outcomes: {'safe_landing': 94, 'hit_B': 3, 'hit_A': 2, 'hit_P': 1}
+win_rate=0.830 mean_ticks=19.9
+outcomes: {'safe_landing': 83, 'hit_O': 14, 'hit_P': 2, 'hit_B': 1}
+win_rate=0.970 mean_ticks=21.1
+outcomes: {'safe_landing': 97, 'hit_B': 2, 'hit_A': 1}
+win_rate=0.970 mean_ticks=21.1
+outcomes: {'safe_landing': 97, 'hit_A': 1, 'hit_O': 1, 'hit_B': 1}

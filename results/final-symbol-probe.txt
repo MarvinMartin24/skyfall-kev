@@ -1,0 +1,9 @@
+below = .: mean P(stay) = 1.00
+below = C: mean P(stay) = 1.00
+below = B: mean P(stay) = 0.00
+below = P: mean P(stay) = 0.00
+below = A: mean P(stay) = 0.00
+below = O: mean P(stay) = 0.33
+below = Z: mean P(stay) = 0.00
+below = X: mean P(stay) = 0.00
+below = 0: mean P(stay) = 0.61
