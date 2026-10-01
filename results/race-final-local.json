@@ -1,0 +1,518 @@
+{
+ "args": {
+  "players": "oracle,kev-released:http://127.0.0.1:8009,kev-final:http://127.0.0.1:8010",
+  "episodes": 20,
+  "seed": 6000,
+  "surprise": false,
+  "kev_price": "jev",
+  "price_in": null,
+  "price_out": null,
+  "gemini_thinking": "none",
+  "gemini_prompt": "procedure",
+  "out": "results/race-final-local"
+ },
+ "tick_ms": 100,
+ "results": [
+  {
+   "player": "oracle",
+   "model_version": null,
+   "decisions": 423,
+   "jumps": 20,
+   "win_rate": 1.0,
+   "move_acc": 1.0,
+   "open_acc": 1.0,
+   "parsed_rate": 1.0,
+   "retries_per_decision": 0.0,
+   "wall_ms_mean": 0.0005086619385343371,
+   "latency_ms_mean": 0.0005086619385343371,
+   "latency_ms_p50": 0.0004579999999948514,
+   "latency_ms_p95": 0.0008750000000043445,
+   "seconds_per_jump": 1.0758200000001231e-05,
+   "rows_fallen_while_thinking": 5.086619385343371e-06,
+   "tokens_in_per_decision": 0,
+   "tokens_out_per_decision": 0,
+   "usd_per_1000_decisions": 0.0,
+   "usd_per_jump": 0.0,
+   "price_per_mtok": {
+    "in": 0.0,
+    "out": 0.0
+   },
+   "jumps_detail": [
+    {
+     "seed": 6000,
+     "result": "win",
+     "reason": "safe_landing",
+     "ticks": 21,
+     "air_s": 1.1499000000012027e-05
+    },
+    {
+     "seed": 6001,
+     "result": "win",
+     "reason": "safe_landing",
+     "ticks": 21,
+     "air_s": 1.1044000000008658e-05
+    },
+    {
+     "seed": 6002,
+     "result": "win",
+     "reason": "safe_landing",
+     "ticks": 21,
+     "air_s": 1.0582999999994569e-05
+    },
+    {
+     "seed": 6003,
+     "result": "win",
+     "reason": "safe_landing",
+     "ticks": 21,
+     "air_s": 9.669000000017691e-06
+    },
+    {
+     "seed": 6004,
+     "result": "win",
+     "reason": "safe_landing",
+     "ticks": 21,
+     "air_s": 1.1249999999997373e-05
+    },
+    {
+     "seed": 6005,
+     "result": "win",
+     "reason": "safe_landing",
+     "ticks": 21,
+     "air_s": 9.671000000030516e-06
+    },
+    {
+     "seed": 6006,
+     "result": "win",
+     "reason": "safe_landing",
+     "ticks": 21,
+     "air_s": 9.711999999995058e-06
+    },
+    {
+     "seed": 6007,
+     "result": "win",
+     "reason": "safe_landing",
+     "ticks": 21,
+     "air_s": 1.1831999999996345e-05
+    },
+    {
+     "seed": 6008,
+     "result": "win",
+     "reason": "safe_landing",
+     "ticks": 21,
+     "air_s": 1.0289999999989197e-05
+    },
+    {
+     "seed": 6009,
+     "result": "win",
+     "reason": "safe_landing",
+     "ticks": 22,
+     "air_s": 1.3041000000012237e-05
+    },
+    {
+     "seed": 6010,
+     "result": "win",
+     "reason": "safe_landing",
+     "ticks": 21,
+     "air_s": 1.1377999999978572e-05
+    },
+    {
+     "seed": 6011,
+     "result": "win",
+     "reason": "safe_landing",
+     "ticks": 22,
+     "air_s": 1.1623999999987866e-05
+    },
+    {
+     "seed": 6012,
+     "result": "win",
+     "reason": "safe_landing",
+     "ticks": 21,
+     "air_s": 1.0119000000016753e-05
+    },
+    {
+     "seed": 6013,
+     "result": "win",
+     "reason": "safe_landing",
+     "ticks": 21,
+     "air_s": 1.0167999999963206e-05
+    },
+    {
+     "seed": 6014,
+     "result": "win",
+     "reason": "safe_landing",
+     "ticks": 22,
+     "air_s": 1.1333000000016136e-05
+    },
+    {
+     "seed": 6015,
+     "result": "win",
+     "reason": "safe_landing",
+     "ticks": 21,
+     "air_s": 1.033200000002954e-05
+    },
+    {
+     "seed": 6016,
+     "result": "win",
+     "reason": "safe_landing",
+     "ticks": 21,
+     "air_s": 1.0377000000019732e-05
+    },
+    {
+     "seed": 6017,
+     "result": "win",
+     "reason": "safe_landing",
+     "ticks": 21,
+     "air_s": 1.070500000001362e-05
+    },
+    {
+     "seed": 6018,
+     "result": "win",
+     "reason": "safe_landing",
+     "ticks": 21,
+     "air_s": 1.0037999999962244e-05
+    },
+    {
+     "seed": 6019,
+     "result": "win",
+     "reason": "safe_landing",
+     "ticks": 21,
+     "air_s": 1.0498999999983272e-05
+    }
+   ]
+  },
+  {
+   "player": "kev-released",
+   "model_version": null,
+   "decisions": 20,
+   "jumps": 20,
+   "win_rate": 0.0,
+   "move_acc": 0.9,
+   "open_acc": 0.0,
+   "parsed_rate": 1.0,
+   "retries_per_decision": 0.0,
+   "wall_ms_mean": 59.46,
+   "latency_ms_mean": 59.46,
+   "latency_ms_p50": 56.349999999999994,
+   "latency_ms_p95": 92.2,
+   "seconds_per_jump": 0.05946,
+   "rows_fallen_while_thinking": 0.5946,
+   "tokens_in_per_decision": 179,
+   "tokens_out_per_decision": 84.5,
+   "usd_per_1000_decisions": 0.007518,
+   "usd_per_jump": 7.518000000000001e-06,
+   "price_per_mtok": {
+    "in": 0.042,
+    "out": 0.0
+   },
+   "jumps_detail": [
+    {
+     "seed": 6000,
+     "result": "lose",
+     "reason": "opened_too_high",
+     "ticks": 1,
+     "air_s": 0.0777
+    },
+    {
+     "seed": 6001,
+     "result": "lose",
+     "reason": "opened_too_high",
+     "ticks": 1,
+     "air_s": 0.056600000000000004
+    },
+    {
+     "seed": 6002,
+     "result": "lose",
+     "reason": "opened_too_high",
+     "ticks": 1,
+     "air_s": 0.0572
+    },
+    {
+     "seed": 6003,
+     "result": "lose",
+     "reason": "opened_too_high",
+     "ticks": 1,
+     "air_s": 0.057
+    },
+    {
+     "seed": 6004,
+     "result": "lose",
+     "reason": "opened_too_high",
+     "ticks": 1,
+     "air_s": 0.055799999999999995
+    },
+    {
+     "seed": 6005,
+     "result": "lose",
+     "reason": "opened_too_high",
+     "ticks": 1,
+     "air_s": 0.056100000000000004
+    },
+    {
+     "seed": 6006,
+     "result": "lose",
+     "reason": "opened_too_high",
+     "ticks": 1,
+     "air_s": 0.055600000000000004
+    },
+    {
+     "seed": 6007,
+     "result": "lose",
+     "reason": "opened_too_high",
+     "ticks": 1,
+     "air_s": 0.055799999999999995
+    },
+    {
+     "seed": 6008,
+     "result": "lose",
+     "reason": "opened_too_high",
+     "ticks": 1,
+     "air_s": 0.0625
+    },
+    {
+     "seed": 6009,
+     "result": "lose",
+     "reason": "opened_too_high",
+     "ticks": 1,
+     "air_s": 0.0922
+    },
+    {
+     "seed": 6010,
+     "result": "lose",
+     "reason": "opened_too_high",
+     "ticks": 1,
+     "air_s": 0.0562
+    },
+    {
+     "seed": 6011,
+     "result": "lose",
+     "reason": "opened_too_high",
+     "ticks": 1,
+     "air_s": 0.0562
+    },
+    {
+     "seed": 6012,
+     "result": "lose",
+     "reason": "opened_too_high",
+     "ticks": 1,
+     "air_s": 0.056299999999999996
+    },
+    {
+     "seed": 6013,
+     "result": "lose",
+     "reason": "opened_too_high",
+     "ticks": 1,
+     "air_s": 0.056600000000000004
+    },
+    {
+     "seed": 6014,
+     "result": "lose",
+     "reason": "opened_too_high",
+     "ticks": 1,
+     "air_s": 0.056299999999999996
+    },
+    {
+     "seed": 6015,
+     "result": "lose",
+     "reason": "opened_too_high",
+     "ticks": 1,
+     "air_s": 0.0564
+    },
+    {
+     "seed": 6016,
+     "result": "lose",
+     "reason": "opened_too_high",
+     "ticks": 1,
+     "air_s": 0.0564
+    },
+    {
+     "seed": 6017,
+     "result": "lose",
+     "reason": "opened_too_high",
+     "ticks": 1,
+     "air_s": 0.0564
+    },
+    {
+     "seed": 6018,
+     "result": "lose",
+     "reason": "opened_too_high",
+     "ticks": 1,
+     "air_s": 0.0559
+    },
+    {
+     "seed": 6019,
+     "result": "lose",
+     "reason": "opened_too_high",
+     "ticks": 1,
+     "air_s": 0.056
+    }
+   ]
+  },
+  {
+   "player": "kev-final",
+   "model_version": null,
+   "decisions": 425,
+   "jumps": 20,
+   "win_rate": 1.0,
+   "move_acc": 0.9976470588235294,
+   "open_acc": 0.9976470588235294,
+   "parsed_rate": 1.0,
+   "retries_per_decision": 0.0,
+   "wall_ms_mean": 59.12517647058824,
+   "latency_ms_mean": 59.12517647058824,
+   "latency_ms_p50": 56.2,
+   "latency_ms_p95": 83.6,
+   "seconds_per_jump": 1.25641,
+   "rows_fallen_while_thinking": 0.5912517647058824,
+   "tokens_in_per_decision": 178.98823529411766,
+   "tokens_out_per_decision": 70.0729411764706,
+   "usd_per_1000_decisions": 0.007517505882352942,
+   "usd_per_jump": 0.00015974700000000001,
+   "price_per_mtok": {
+    "in": 0.042,
+    "out": 0.0
+   },
+   "jumps_detail": [
+    {
+     "seed": 6000,
+     "result": "win",
+     "reason": "safe_landing",
+     "ticks": 21,
+     "air_s": 1.3046999999999997
+    },
+    {
+     "seed": 6001,
+     "result": "win",
+     "reason": "safe_landing",
+     "ticks": 23,
+     "air_s": 1.391
+    },
+    {
+     "seed": 6002,
+     "result": "win",
+     "reason": "safe_landing",
+     "ticks": 21,
+     "air_s": 1.2223000000000002
+    },
+    {
+     "seed": 6003,
+     "result": "win",
+     "reason": "safe_landing",
+     "ticks": 21,
+     "air_s": 1.2211
+    },
+    {
+     "seed": 6004,
+     "result": "win",
+     "reason": "safe_landing",
+     "ticks": 21,
+     "air_s": 1.1772
+    },
+    {
+     "seed": 6005,
+     "result": "win",
+     "reason": "safe_landing",
+     "ticks": 21,
+     "air_s": 1.2193000000000003
+    },
+    {
+     "seed": 6006,
+     "result": "win",
+     "reason": "safe_landing",
+     "ticks": 21,
+     "air_s": 1.2204999999999997
+    },
+    {
+     "seed": 6007,
+     "result": "win",
+     "reason": "safe_landing",
+     "ticks": 21,
+     "air_s": 1.1854
+    },
+    {
+     "seed": 6008,
+     "result": "win",
+     "reason": "safe_landing",
+     "ticks": 21,
+     "air_s": 1.2554
+    },
+    {
+     "seed": 6009,
+     "result": "win",
+     "reason": "safe_landing",
+     "ticks": 22,
+     "air_s": 1.322
+    },
+    {
+     "seed": 6010,
+     "result": "win",
+     "reason": "safe_landing",
+     "ticks": 21,
+     "air_s": 1.2673
+    },
+    {
+     "seed": 6011,
+     "result": "win",
+     "reason": "safe_landing",
+     "ticks": 22,
+     "air_s": 1.2815999999999999
+    },
+    {
+     "seed": 6012,
+     "result": "win",
+     "reason": "safe_landing",
+     "ticks": 21,
+     "air_s": 1.2664000000000002
+    },
+    {
+     "seed": 6013,
+     "result": "win",
+     "reason": "safe_landing",
+     "ticks": 21,
+     "air_s": 1.2683
+    },
+    {
+     "seed": 6014,
+     "result": "win",
+     "reason": "safe_landing",
+     "ticks": 22,
+     "air_s": 1.3219999999999998
+    },
+    {
+     "seed": 6015,
+     "result": "win",
+     "reason": "safe_landing",
+     "ticks": 21,
+     "air_s": 1.2689999999999997
+    },
+    {
+     "seed": 6016,
+     "result": "win",
+     "reason": "safe_landing",
+     "ticks": 21,
+     "air_s": 1.2659
+    },
+    {
+     "seed": 6017,
+     "result": "win",
+     "reason": "safe_landing",
+     "ticks": 21,
+     "air_s": 1.2682
+    },
+    {
+     "seed": 6018,
+     "result": "win",
+     "reason": "safe_landing",
+     "ticks": 21,
+     "air_s": 1.1758000000000002
+    },
+    {
+     "seed": 6019,
+     "result": "win",
+     "reason": "safe_landing",
+     "ticks": 21,
+     "air_s": 1.2247999999999999
+    }
+   ]
+  }
+ ]
+}

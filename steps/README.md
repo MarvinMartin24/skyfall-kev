@@ -11,7 +11,7 @@ fails acceptance, the step is redone and the file says so.
 | 03 | [Zero-shot baseline](03-baseline.md) | **done**: move 0.55, open 0.47, Brier 0.57 |
 | 04 | [Fine-tune](04-train.md) | **done**: 5.8 h on M2 Max, final move 0.993 / open 1.000 |
 | 05 | [Evaluate, play, surprise obstacle](05-evaluate.md) | **done**: 94/100 jumps, 83/100 with balloons |
-| 06 | [The race: latency, tokens, cost](06-latency.md) | partial: Gemini paused by request; local race pending |
+| 06 | [The race: latency, tokens, cost](06-latency.md) | **done** locally (60 ms/decision); Gemini part paused by request |
 | 07 | [Docs: reproduce, demo, explain](07-docs.md) | drafted with final numbers; review pending |
 | 08 | [Dry run](08-dry-run.md) | todo |
 

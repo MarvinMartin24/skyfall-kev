@@ -177,7 +177,7 @@ per 100 ms is 270 rows of free fall. Larger variants are being measured.
 The free tier also matters for the story: 44% of lite decisions needed a
 retry, so the wall time per decision was 2.5 s.
 
-## 8. What the audience should take away (draft)
+## 8. Takeaways, first draft (superseded by §12)
 
 - A decision model is the same transformer with a different readout. One
   pass, probabilities out, options described in text.
@@ -235,4 +235,39 @@ round, hollow glyphs look like empty cells. Of all the symbols we could have
 picked for the surprise, the balloon was the one that looks like a hole.
 Had we chosen `Z`, the test would have passed cleanly. That is the slide.
 
-_(continued: the full race and latency on an idle GPU)_
+## 11. The full benchmark, and the clock (Oct 1, 06:00)
+
+`kev.benchmark` on all 2,000 held-out states: move accuracy 0.9975 (5 errors),
+open 0.999, Brier 0.005 and 0.002, expected calibration error 0.002. The
+released model on the same states: 0.554 and 0.467.
+
+With the GPU finally idle, one decision (both questions, 43-token state)
+takes **56 ms median** through Kev's MLX server, p95 84 ms,
+1.3 s for a whole jump. The released model is the same speed
+(56 ms): fine-tuning changes the answers, not the cost. At Jev's
+list price that is $0.0075 per 1,000 decisions; locally it is
+electricity. The Gemini side of the race was paused at Marvin's request
+after the free-tier numbers in §7; those stand as measured: 745 ms per
+decision and 0 of 10 jumps with the bare prompt, 0.70 move accuracy at
+about 900 ms with a visible chain of thought, 27 s with the flagship's
+thinking on.
+
+Local race, 20 fresh seeds: oracle 20/20, released Kev 0/20, final 20/20.
+
+## 12. What the audience should take away
+
+- A decision model is the same transformer with a different readout. One
+  pass, probabilities out, options described in text.
+- Synthetic data from a rule is legitimate when the rule *is* the task, and
+  tests that re-derive labels and forbid leakage are what make it honest.
+  Two reviews found real bugs before training; both would have been
+  invisible in the final accuracy.
+- Fine-tuning learns the easy signal first. The altitude rule took 100
+  steps, reading the grid took 1,300. Watch the curve, not the loss, and do
+  not touch the learning rate during warm-up.
+- The surprise test is only as good as the surprise. `Z` passes, `O` half
+  fails, because `O` looks like a hole. Say which one you tested and why.
+- An LLM can play this, but only by thinking, and thinking is what you pay
+  for in time and tokens. The decision model's job is to not need it:
+  56 ms versus 900 ms to 27 s, at a hundredth of the price.
+

@@ -1,0 +1,8 @@
+{
+ "n": 500,
+ "move_acc": 0.524,
+ "open_acc": 0.454,
+ "move_brier": 0.63,
+ "open_brier": 0.254,
+ "mean_latency_ms": 61.9
+}

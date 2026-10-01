@@ -25,3 +25,16 @@ tokens in/out per decision, USD per 1,000 decisions and per jump, parse failures
 ## Acceptance
 - `results/latency.md` with mean and p95 for both, same hardware, same states.
 - Note any caveat (serving overhead, batch size 1, warm-up excluded).
+
+
+## Result
+- Kev through its MLX server on the M2 Max, GPU idle, 500 held-out states:
+  final model 60 ms mean per decision, released 62 ms.
+- Local race (`results/race-final-local.md`, 20 jumps): final p50 56 ms, p95 84 ms,
+  1.3 s per jump, 20/20 wins; released 0/20.
+- Gemini (free tier, paused by request before the chain-of-thought race finished):
+  bare prompt 745 ms p50 and 0/10 jumps (`results/race-base-vs-gemini-lite.md`);
+  prompt study on 60 states (`results/llm_prompt_eval.json`, `results/llm_eval_lite_cot.json`):
+  minimal 0.33, rules 0.43, procedure 0.45, chain-of-thought 0.70 move accuracy at ~900 ms;
+  gemini-3.8-flash with thinking "low" ~27 s per decision (probe only).
+- Open: the chain-of-thought race and the 3.5/3.8 thinking variants, if Gemini is re-enabled.

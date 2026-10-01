@@ -1,0 +1,17 @@
+{
+ "run": "runs/skyfall-0.8b (final, step 2500)",
+ "data": "data/eval.jsonl (2000 states, 4000 questions)",
+ "move_acc": 0.9975,
+ "move_brier": 0.004880543296943113,
+ "move_nll": 0.009059706173986569,
+ "open_acc": 0.999,
+ "open_brier": 0.0020071787830916203,
+ "open_nll": 0.007220079622008136,
+ "overall_acc": 0.99825,
+ "overall_brier": 0.003443861040017367,
+ "ece": 0.0017245988484758201,
+ "mean_confidence": 0.999606354054339,
+ "latency_ms_median": 445.09506248869,
+ "latency_ms_p95": 836.8536598456558,
+ "inference_temperature": 1.0
+}
