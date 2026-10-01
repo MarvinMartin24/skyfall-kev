@@ -13,7 +13,7 @@ fails acceptance, the step is redone and the file says so.
 | 05 | [Evaluate, play, surprise obstacle](05-evaluate.md) | **done**: 94/100 jumps, 83/100 with balloons |
 | 06 | [The race: latency, tokens, cost](06-latency.md) | **done** locally (60 ms/decision); Gemini part paused by request |
 | 07 | [Docs: reproduce, demo, explain](07-docs.md) | drafted with final numbers; review pending |
-| 08 | [Dry run](08-dry-run.md) | todo |
+| 08 | [Dry run](08-dry-run.md) | **done**: fresh clone reproduces data byte-for-byte; release checkpoint serves |
 
 Execution environment for every step: this Mac (Apple M2 Max, 64 GB, Metal via
 PyTorch `mps`). Colab commands are kept in `colab/train.sh` as the alternative.
