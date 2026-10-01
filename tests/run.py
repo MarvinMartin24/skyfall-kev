@@ -1,6 +1,6 @@
 """Minimal test runner (no pytest dependency): python -m tests.run"""
 import importlib, inspect, sys, traceback
-mods = ["tests.test_sim"]
+mods = ["tests.test_sim", "tests.test_data"]
 failed = 0
 for m in mods:
     mod = importlib.import_module(m)

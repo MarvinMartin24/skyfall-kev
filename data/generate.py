@@ -15,13 +15,14 @@ def example(w, labels):
     return {"state": w.render(), "questions": qs}
 
 
-def collect(seed_start, n_target, eps=0.3, mix=(0.45, 0.15, 0.40)):
+def collect(seed_start, n_target, eps=0.3, mix=(0.45, 0.15, 0.40), exclude=frozenset()):
     """Play oracle episodes with eps-random moves so we also see bad positions.
     Labels always come from the oracle. Three buckets, mixed to fixed ratios:
       dodge: move != stay        open: move == stay and open == True
-      idle:  everything else (stay, no open)"""
+      idle:  everything else (stay, no open)
+    States in `exclude` (e.g. the eval set) are never emitted."""
     rng = random.Random(seed_start)
-    seen, buckets = set(), {"dodge": [], "open": [], "idle": []}
+    seen, buckets = set(exclude), {"dodge": [], "open": [], "idle": []}
     need = {k: int(n_target * f) for k, f in zip(buckets, mix)}
     need["idle"] = n_target - need["dodge"] - need["open"]
     seed = seed_start
@@ -65,8 +66,10 @@ def main():
     p.add_argument("--eval", type=int, default=2000)
     p.add_argument("--out", default="data")
     a = p.parse_args()
-    for name, n, seed in (("train", a.train, 1_000_000), ("eval", a.eval, 2_000_000)):
-        rows = collect(seed, n)
+    # eval first, then train with every eval state excluded: no leakage across splits
+    eval_rows = collect(2_000_000, a.eval)
+    train_rows = collect(1_000_000, a.train, exclude=frozenset(r["state"] for r in eval_rows))
+    for name, rows in (("train", train_rows), ("eval", eval_rows)):
         path = f"{a.out}/{name}.jsonl"
         with open(path, "w") as f:
             for r in rows:
