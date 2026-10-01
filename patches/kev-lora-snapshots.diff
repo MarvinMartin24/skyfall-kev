@@ -1,0 +1,26 @@
+diff --git a/kev/train.py b/kev/train.py
+index f72dcc4..6409d45 100644
+--- a/kev/train.py
++++ b/kev/train.py
+@@ -427,6 +427,7 @@ def parse_args():
+                                                                    "branch, none-pair siblings included) no forward/backward pass may exceed; the plan cuts on exact "
+                                                                    "token shapes and gives a step more micro-batches (every rank the same count) until none does (0 = off)")
+     ap.add_argument("--max_steps", type=int, default=0, help="stop after this many optimizer steps (0 = every epoch); the lr schedule spans them")
++    ap.add_argument("--lora_snapshot_every", type=int, default=0, help="LoRA runs: also write a loadable checkpoint (adapter + head.pt + tokenizer) every N optimizer steps to <out>-snapshots/step-<N> (0 = off)")
+     ap.add_argument("--save_every_steps", type=int, default=0, help="full-weight: write a resume point (<out>/resume) every N optimizer steps")
+     ap.add_argument("--save_every_minutes", type=float, default=0, help="full-weight: write a resume point once this many minutes have passed since the last")
+     ap.add_argument("--resume", type=int, choices=[0, 1], default=0, help="full-weight: continue from <out>/resume if it holds a resume point (same arguments), else start")
+@@ -638,6 +639,13 @@ def main():
+                 if step % 10 == 0:
+                     print(f"ep{ep} step {step}/{steps} loss {run['ce']/run['n']:.3f} kl {run['kl']/max(run['kl_n'],1):.3f} anchor {run['anchor']/max(run['anchor_n'],1):.3f} {(time.time()-t0)/seen:.3f}s/rec", flush=True)
+                     run = Counter()
++                if a.lora_snapshot_every and not a.full_ft and step % a.lora_snapshot_every == 0 and step != steps:
++                    d = Path(f"{a.out}-snapshots/step-{step}"); d.mkdir(parents=True, exist_ok=True)
++                    model.lm.save_pretrained(d)
++                    snap_meta = dataclasses.replace(meta, head=model.head.state_dict(), extra={"args": vars(a), "suite_sha256": suite_hash, "init_source": init_source, "lora_snapshot": {"step": step, "steps": steps, "epoch": ep}})
++                    finish_checkpoint(d, snap_meta, tok)
++                    print(f"lora snapshot: step {step}/{steps} -> {d}", flush=True)
++                    last = time.time()   # the save is not part of the next step's time
+                 if step == steps: break
+                 if snapshots and snapshots.due(step):
+                     info = {"step": step, "steps": steps, "epoch": round(ep + (mb + 1) / len(plan), 6), "records_seen": round(full_ft.global_sum([seen])[0])}
