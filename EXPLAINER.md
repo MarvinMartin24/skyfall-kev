@@ -113,7 +113,16 @@ What the LoRA has to learn for Skyfall, concretely:
    pattern, not a number the model is told).
 2. Read the cell directly under `Y` in the next row.
 3. If it is not `.`, compare the two neighbouring columns at rows 1 and 2.
-4. Compare the altitude number to 1000 for the `open` question.
+4. For `open`: compare the altitude number to 1000 **and** check that the
+   cell directly below is empty. Both conditions matter: 5% of the data is
+   "low altitude but something is under you", where the right answer is to
+   sidestep and not open.
+
+Note what question isolation implies here. Kev answers `move` and `open`
+without either seeing the other, so each label must be a pure function of the
+state. That is why the rule says "open only when the cell below is *already*
+empty" rather than "sidestep and open in the same tick": the second version
+would make `open` depend on the `move` answer, which the model cannot see.
 
 None of this is in the released model's training data, which is why it starts
 near chance (see `results/`). It is also why the task is a clean test:
@@ -138,8 +147,14 @@ Three safeguards make it honest:
   recomputes the oracle label; a second test asserts zero overlap. The first
   version of the generator leaked 42 eval states into train; the test caught
   it.
-- The class mix is fixed (45% dodge, 15% open, 40% idle) so "always say stay"
-  cannot score well.
+- The class mix is fixed (40% dodge, 15% open, 5% low-altitude-but-blocked,
+  40% idle) so "always say stay" and "open iff altitude <= 1000" cannot score
+  well. The first generator had no quota for the blocked-at-low-altitude case,
+  and in that data `open` was perfectly predictable from the altitude alone;
+  the review caught it.
+- Cross-split exclusion is keyed on the decision inputs (the grid and which
+  side of 1000 m the state is on), not on the exact text, after the review
+  found 9% of eval grids in train at a different altitude.
 
 ## 6. Calibration, and why probabilities matter
 
