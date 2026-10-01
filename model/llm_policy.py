@@ -29,7 +29,10 @@ PRICES = {                            # list prices found 2026-09-30; check ai.g
     "gemini-2.5-pro": (1.25, 10.00),
     "gemini-3-flash": (0.50, 3.00),
     "gemini-3.7-flash": (0.75, 3.75),
-    "gemini-3.8-flash": (0.75, 3.75),   # assumed equal to 3.7-flash; verify on ai.google.dev/pricing
+    "gemini-3.8-flash": (0.75, 3.75),   # output price includes thinking tokens
+    "gemini-3.5-flash": (1.50, 9.00),
+    "gemini-3.1-flash-lite": (0.25, 1.50),
+    "gemini-flash-lite-latest": (0.25, 1.50),   # alias; the response's modelVersion says what actually served it
     "jev": (0.042, 0.0),              # TypeSafe's published Jev price: input only, output free
 }
 
@@ -114,4 +117,4 @@ class GeminiPolicy:
         action = parse_answer(text) or {"move": "stay", "open": False}     # unparseable -> do nothing
         return {"action": action, "parsed": parse_answer(text) is not None, "latency_ms": ms, "wall_ms": wall_ms, "retries": attempt, "error": err,
                 "input_tokens": usage.get("promptTokenCount", 0), "output_tokens": usage.get("candidatesTokenCount", 0),
-                "thinking_tokens": usage.get("thoughtsTokenCount", 0), "raw": text[:200]}
+                "thinking_tokens": usage.get("thoughtsTokenCount", 0), "model_version": resp.get("modelVersion"), "raw": text[:200]}

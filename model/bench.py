@@ -82,6 +82,8 @@ def run(player, seeds, surprise, log):
             truth = oracle(w)
             d = player.decide(w)
             a = d["action"]
+            if d.get("model_version") and not getattr(player, "model_version", None):
+                player.model_version = d["model_version"]
             rows.append({"seed": seed, "tick": w.ticks, "alt": w.alt, "latency_ms": d["latency_ms"],
                          "in": d.get("input_tokens", 0), "out": d.get("output_tokens", 0), "think": d.get("thinking_tokens", 0),
                          "parsed": d.get("parsed", True), "retries": d.get("retries", 0), "wall_ms": d.get("wall_ms", d["latency_ms"]),
@@ -94,7 +96,7 @@ def run(player, seeds, surprise, log):
     n = len(rows)
     pin, pout = player.price
     cost_per_decision = (statistics.mean(r["in"] for r in rows) * pin + statistics.mean(r["out"] + r["think"] for r in rows) * pout) / 1e6
-    return {"player": player.name, "decisions": n, "jumps": len(jumps),
+    return {"player": player.name, "model_version": getattr(player, "model_version", None), "decisions": n, "jumps": len(jumps),
             "win_rate": sum(j["result"] == "win" for j in jumps) / len(jumps),
             "move_acc": sum(r["move_ok"] for r in rows) / n, "open_acc": sum(r["open_ok"] for r in rows) / n,
             "parsed_rate": sum(r["parsed"] for r in rows) / n, "retries_per_decision": sum(r["retries"] for r in rows) / n,
