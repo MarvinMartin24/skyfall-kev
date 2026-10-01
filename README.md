@@ -2,7 +2,7 @@
 
 A tiny grid skydiving game used to fine-tune a Kev decision model
 (open reimplementation of TypeSafe's Jev) on one GPU, for a 30-minute demo.
-Plan and rules: [PLAN.md](PLAN.md).
+Plan and rules: [PLAN.md](PLAN.md). The story of how it was built, for the talk: [STORY.md](STORY.md).
 
 Play it yourself (from the repo folder, or by path from anywhere). In-place
 terminal UI, single keys: `a`/`←` left, `d`/`→` right, enter stay, space open,
