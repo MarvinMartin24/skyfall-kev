@@ -165,7 +165,8 @@ Say that out loud in the demo.
 
 The oracle is the definition of correct play, so labels are ground truth by
 construction, the dataset is as large as we like, and evaluation is exact.
-Three safeguards make it honest:
+Four safeguards make it
+honest:
 
 - Rollouts mix 30% random moves so the data covers bad positions the oracle
   alone would never reach (otherwise the model never sees "you are next to a
