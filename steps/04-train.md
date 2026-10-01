@@ -31,6 +31,12 @@ A checkpoint that clears the bar: `move` accuracy >= 0.90, `open` >= 0.95 on
 - Live metrics mirrored to Weights & Biases by `scripts/wandb_tail.py`
   (Kev has no W&B hook; the tailer parses the log):
   https://wandb.ai/marvtin/skyfall-kev/runs/0vk3l20p
-- Early loss: step 10 0.866, step 30 0.688, step 50 0.584 (per-record mean
-  cross-entropy over the two questions). ~0.8 s/record while sharing the GPU
-  with the baseline benchmark.
+- Loss: step 50 0.58, step 250 0.57 (end of OneCycle warm-up), step 300 0.50,
+  step 400 0.37. About 1.0–1.2 s/record on `mps` while sharing the GPU with
+  servers and (for a while) a probe run.
+- Learning curve on 300 held-out states (`results/learning_curve.jsonl`,
+  W&B run `skyfall-0.8b-eval-curve`): move 0.51 / 0.50 / 0.57 / 0.69 and open
+  0.89 / 0.93 / 0.93 / 0.94 at steps 100 / 200 / 300 / 400. Altitude first,
+  grid later.
+- Probe `runs/probe-lr1e-4` (lr 1e-4, 300 steps, batch 4, accum 1): move 0.50
+  at steps 100, 200 and 300. Higher LR did not help; retired.

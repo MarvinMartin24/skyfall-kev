@@ -98,6 +98,7 @@ jump can be watched with a progressively better brain.
 | 100 | 800 | 0.89 | 0.51 |
 | 200 | 1,600 | 0.93 | 0.50 |
 | 300 | 2,400 | 0.93 | 0.57 (Brier 0.53, first real movement) |
+| 400 | 3,200 | 0.94 | 0.69 (Brier 0.37) |
 
 The model learned the altitude rule almost immediately and, for the first
 250 steps, did not read the grid at all. It always says "stay" and flies into the first obstacle.
@@ -108,10 +109,16 @@ Y" is a positional pattern the adapters have to invent. Also, Kev's schedule
 250, so judging at step 200 was early.
 
 What we did about it: a probe run in parallel with a 5x higher learning rate
-(1e-4, 300 steps) to see whether the plateau is a learning-rate problem, and
-a watcher that evaluates every snapshot and logs the curve to W&B. The
-decision rule: if move accuracy is still near 0.55 by step 500 on the main
-run and the probe moves, restart with the higher rate.
+(1e-4, 300 steps, 1,200 records) to see whether the plateau was a
+learning-rate problem, and a watcher that evaluates every snapshot and logs
+the curve to W&B. Verdict: the probe never left 0.50 on move; the main run
+broke through on its own once warm-up ended (0.57 at step 300, 0.69 at step
+400). The original recipe stays. Lesson for the talk: a plateau right after
+warm-up is not a reason to touch the learning rate; look at the curve one or
+two snapshots later.
+
+Win rates on live jumps at this stage: released Kev 0/200 (opens on tick 1),
+step-300 snapshot 9/50, oracle 95%.
 
 ## 7. The race against an LLM
 
