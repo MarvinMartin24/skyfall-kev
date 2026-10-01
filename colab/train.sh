@@ -4,10 +4,10 @@
 # 0. GPU check: must print True, otherwise change the runtime (T4 has no bf16)
 python -c "import torch; print(torch.cuda.is_bf16_supported(), torch.cuda.get_device_name())"
 
-# 1. Install Kev
+# 1. Install Kev (+ our 12-line patch for periodic LoRA snapshots)
 pip install -q uv
 git clone https://github.com/jaredpalmer/kev.git
-cd kev && uv sync --extra serve
+cd kev && git apply /content/drive/MyDrive/skyfall/patches/kev-lora-snapshots.diff && uv sync --extra serve
 
 # 2. Mount Drive, upload the skyfall repo there, point at it
 #    from google.colab import drive; drive.mount('/content/drive')
@@ -24,7 +24,7 @@ uv run python -m kev.benchmark --run jaredpalmer/kev-0.8b --data $SKY/data/eval.
 #    --dtype bf16 is CUDA-only in kev.train; on a Mac use --device mps --dtype fp32 (see REPRODUCE.md).
 uv run python -m kev.train --data $SKY/data/train.jsonl --init_from jaredpalmer/kev-0.8b \
   --base Qwen/Qwen3.5-0.8B-Base --epochs 1 --lr 2e-5 --batch 4 --accum 2 \
-  --dtype bf16 --device cuda --checkpointing 1 --out $RUNS/skyfall-0.8b
+  --dtype bf16 --device cuda --checkpointing 1 --lora_snapshot_every 100 --out $RUNS/skyfall-0.8b
 #    If memory is tight on an L4: --batch 1 --accum 8
 
 # 5. Evaluate the fine-tune the same way

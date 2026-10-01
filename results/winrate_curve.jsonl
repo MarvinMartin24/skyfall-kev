@@ -8,3 +8,5 @@
 {"step": 1300, "snapshot": "step-1300", "win_rate_50": 0.960, "mean_ticks": 20.8, "time": "2026-10-01 02:53"}
 {"step": 1100, "snapshot": "step-1100", "win_rate_50": 0.820, "mean_ticks": 19.1, "time": "2026-10-01 02:55", "backfilled": true}
 {"step": 1200, "snapshot": "step-1200", "win_rate_50": 0.860, "mean_ticks": 19.9, "time": "2026-10-01 02:58", "backfilled": true}
+{"step": 1400, "snapshot": "step-1400", "win_rate_50": 0.960, "mean_ticks": 20.7, "time": "2026-10-01 03:03"}
+{"step": 1500, "snapshot": "step-1500", "win_rate_50": 0.980, "mean_ticks": 21.0, "time": "2026-10-01 03:16"}
