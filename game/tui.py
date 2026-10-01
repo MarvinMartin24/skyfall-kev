@@ -14,16 +14,16 @@ import termios
 import time
 import tty
 
-from game.sim import World, WIDTH, HEIGHT, PLAYER_ROW, EMPTY, PLAYER, DEAD, OPEN_ALT, START_ALT, ALT_STEP
+from game.sim import World, WIDTH, HEIGHT, PLAYER_ROW, EMPTY, PLAYER, DEAD, PASSABLE, CLOUD, OPEN_ALT, START_ALT, ALT_STEP
 from game.oracle import oracle
 
 E = "\x1b["
 RESET = E + "0m"
 BOLD = E + "1m"
 DIM = E + "2m"
-COLOR = {"Y": E + "1;32m", "X": E + "1;31m", "B": E + "33m", "P": E + "35m", "A": E + "31m", "O": E + "36m"}
-NAME = {"B": "bird", "P": "skydiver", "A": "airplane", "O": "balloon"}
-EMOJI = {"Y": "🧍", "X": "💥", "B": "🐦", "P": "🪂", "A": "🛫", "O": "🎈"}
+COLOR = {"Y": E + "1;32m", "X": E + "1;31m", "B": E + "33m", "P": E + "35m", "A": E + "31m", "O": E + "36m", "C": E + "1;37m"}
+NAME = {"B": "bird", "P": "skydiver", "A": "airplane", "O": "balloon", "C": "cloud (harmless)"}
+EMOJI = {"Y": "🧍", "X": "💥", "B": "🐦", "P": "🪂", "A": "🛫", "O": "🎈", "C": "☁️"}
 KEYMAP = {"a": "left", "D": "left", "d": "right", "C": "right", "s": "stay", "\n": "stay", "\r": "stay", "B": "stay",
           " ": "open", "o": "open"}
 
@@ -92,7 +92,7 @@ def frame(w, st, emoji):
     for r, row in enumerate(w.grid):
         cells = list(row)
         if r == PLAYER_ROW:
-            cells[w.col] = PLAYER if row[w.col] == EMPTY else DEAD
+            cells[w.col] = PLAYER if row[w.col] in PASSABLE else DEAD
         rows.append("│" + "".join(cell(c, emoji, ground=g is not None and r >= g) for c in cells) + "│")
     grid = ["┌" + "─" * inner + "┐"] + rows + ["└" + "─" * inner + "┘"]
 
@@ -122,7 +122,7 @@ def frame(w, st, emoji):
     for i in range(max(len(grid), len(hud))):
         left = grid[i] if i < len(grid) else " " * (inner + 2)
         lines.append(left + "   " + (hud[i] if i < len(hud) else ""))
-    legend = "   ".join(f"{COLOR[c]}{c}{RESET} {NAME[c]}" for c in ("B", "P", "A")) + ("   " + COLOR["O"] + "O" + RESET + " balloon (never seen in training)" if w.surprise else "") + "   " + GROUND_BG + E + "30m" + "▒" + RESET + " ground (visual only, 100 m per row)"
+    legend = "   ".join(f"{COLOR[c]}{c}{RESET} {NAME[c]}" for c in ("B", "P", "A", "C")) + ("   " + COLOR["O"] + "O" + RESET + " balloon (never seen in training)" if w.surprise else "") + "   " + GROUND_BG + E + "30m" + "▒" + RESET + " ground (visual only, 100 m per row)"
     keys = "a/← left   d/→ right   enter stay   space open   h hint   r replay   q quit" if st["who"] == "you" else "q quit   r next seed"
     return "\n".join(["", *lines, "", legend, DIM + keys + RESET, ""])
 

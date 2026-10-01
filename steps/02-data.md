@@ -55,3 +55,8 @@ blocked below" case. Added a fourth bucket `low_blocked` with a 5% quota
 
 Consequence: data regenerated (v3), and the baseline benchmark and fine-tune were
 restarted on the new files (about 12 minutes of training lost in total).
+
+v4 (2026-09-30 23:40): harmless clouds `C` added to the game (spawn 0.3 per row,
+independent of deadly obstacles). The question text now says "clouds are
+harmless, any other letter is deadly". Data regenerated, jobs restarted again
+(another ~15 minutes of training lost). Oracle on v4 layouts: 0.94 win rate.

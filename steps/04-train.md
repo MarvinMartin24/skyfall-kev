@@ -20,7 +20,7 @@ A checkpoint that clears the bar: `move` accuracy >= 0.90, `open` >= 0.95 on
 - Loss decreases monotonically per epoch; no NaNs.
 - Review: training config and metrics committed under `results/`.
 
-## Result (in progress)
+## Result (in progress; attempts 1–3 were restarted after data fixes, see steps/02-data.md)
 - Started 2026-09-30 23:04 on the M2 Max, `scripts/train_mac.sh`: 20,000 records,
   `--init_from jaredpalmer/kev-0.8b`, LoRA rank 16, lr 2e-5, batch 4 x accum 2 =
   2,500 optimizer steps, fp32 on `mps`. 11.3M trainable parameters.

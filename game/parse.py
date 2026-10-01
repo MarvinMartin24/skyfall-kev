@@ -5,7 +5,7 @@ from game.sim import World, WIDTH, HEIGHT, PLAYER, PLAYER_ROW, EMPTY
 def parse_state(text):
     lines = text.strip("\n").split("\n")
     assert lines[0].startswith("altitude: "), lines[0]
-    w = World(seed=0, spawn_prob=0.0)
+    w = World(seed=0, spawn_prob=0.0, cloud_prob=0.0)
     w.alt = int(lines[0].split(": ")[1])
     rows = [line.split(" ") for line in lines[1:]]
     assert len(rows) == HEIGHT and all(len(r) == WIDTH for r in rows), rows
