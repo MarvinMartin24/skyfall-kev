@@ -33,9 +33,11 @@ the pointer head (two 1024 to 256 linear maps). We warm-start both from the
 released checkpoint ("delta mode"). Loss is cross-entropy per question.
 
 **Did it learn the rule or memorise states?**
-Eval states are excluded from training by construction and the model is
-scored on 2,000 of them. The balloon test adds an obstacle symbol never seen
-in training; see `results/` for what happened.
+Eval grids are excluded from training by construction and it makes 2 move
+errors in 300 of them. The balloon test adds a symbol never seen in training:
+83 of 100 jumps, and a probe shows it treats `Z` and `X`, also never seen, as
+deadly with probability 1.00. It learned the rule; it also learned that a
+round hollow glyph looks like an empty cell.
 
 **Is this reinforcement learning?**
 No. Supervised imitation of a 15-line oracle. The model never plays during
@@ -43,9 +45,10 @@ training. A "let it play, collect its deaths, relabel, retrain" loop (DAgger)
 would be the next step and is still supervised.
 
 **How much data did it need?**
-See `results/table.md`. The Kev repo's own guidance: under about 400 records
-the gains are noise; thousands is where it moves. We used 20k because
-generating them is free.
+20,000 records, one epoch. The altitude rule was learned by record 800, the
+grid by record 10,400 (step 1,300), and the last 1,200 steps only sharpened
+confidence (Brier 0.04 → 0.01). A smaller run would likely do; we did not
+ablate it. The Kev repo's guidance: under about 400 records gains are noise.
 
 **Why are probabilities better than an answer?**
 You can threshold them, log them, and measure calibration. We report the

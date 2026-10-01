@@ -40,3 +40,14 @@ A checkpoint that clears the bar: `move` accuracy >= 0.90, `open` >= 0.95 on
   grid later.
 - Probe `runs/probe-lr1e-4` (lr 1e-4, 300 steps, batch 4, accum 1): move 0.50
   at steps 100, 200 and 300. Higher LR did not help; retired.
+
+
+## Final result
+- `runs/skyfall-0.8b/`: 2,500 steps, 20,000 records, 5.8 h wall-clock, fp32 on
+  `mps`, 3.2 GB peak device memory, 3.6M forward tokens. Gradient norm clipped
+  on 1,192 of 2,500 steps (mean 10.9 before clipping). Checkpoint 62 MB,
+  attached to GitHub release `v0.1-final`.
+- W&B: `skyfall-0.8b-mps-final` (training loss) and `skyfall-0.8b-eval-curve`
+  (held-out accuracy per snapshot).
+- Acceptance: `kev.benchmark` on the final model is in `runs/ft-eval/report.json`
+  (see `results/table.md`); `model/eval.py` on 300 states: move 0.993, open 1.000.

@@ -125,7 +125,12 @@ empty" rather than "sidestep and open in the same tick": the second version
 would make `open` depend on the `move` answer, which the model cannot see.
 
 None of this is in the released model's training data, which is why it starts
-near chance (see `results/`). It is also why the task is a clean test:
+at the majority class (move 0.55 = "always stay") and below chance on open
+(0.47). What the curve then shows, in order: the altitude rule by step 100
+(open 0.89), nothing on the grid until the learning-rate warm-up ends at step
+250, "something is below me" by step 400 (move 0.69), "which way" by step
+800 (0.92), parity with the rule by step 1,300 (0.98, and 48 of 50 live
+jumps). Easy signals first, positional ones later. It is also why the task is a clean test:
 the rule is simple to state, impossible to guess from text priors, and
 checkable against a 15-line oracle.
 
@@ -178,8 +183,12 @@ hot-air balloon, which the model has never seen. The oracle does not care
   result: it tells you the LoRA latched onto token identity, and the fix is
   obvious (more obstacle symbols in training).
 
-Either way the slide is honest. Do not predict the outcome before you have
-run it.
+What happened: 83 of 100 jumps with balloons, 14 deaths by balloon, against
+97 for the oracle. A probe with a single symbol under `Y` gives P(stay) = 0.00
+for `B`, `P`, `A` and also for `Z` and `X`, letters it never saw, but 0.33 for
+`O` and 0.61 for the digit `0`. The rule generalised to new letters; round,
+hollow glyphs are half-read as empty cells. The surprise symbol we chose was
+the one that looks like a hole.
 
 ## 8. Why it is fast (the closing slide)
 

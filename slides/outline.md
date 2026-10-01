@@ -1,69 +1,60 @@
-# Slides: outline with speaker notes
+# Slides: outline with speaker notes (numbers from results/)
 
-Placeholders in `{{ }}` are filled from `results/table.md` and `results/latency.md`.
-Target: 12 slides, 30 minutes including questions.
-
----
-
-### 1. Title
-**Teaching a decision model to skydive, on one laptop**
-Notes: "Thirty minutes. One game, one rule, one fine-tune, one table. Everything is in a repo you can clone."
+### 1. Title: Teaching a decision model to skydive, on one laptop
+"Thirty minutes. One game, one rule, one fine-tune, one table. Everything is in a repo you can clone, with the checkpoint as a release."
 
 ### 2. Generator vs decision model
-Left: prompt → decode token by token → parse string. Right: state + typed questions → one forward pass → probabilities.
-Notes: "Same transformer. The difference is what you read out. A generator gives you a string you have to trust and parse, after N forward passes. A decision model gives you a probability per option after one. TypeSafe calls this System One and sells it as Jev. Kev is the open reimplementation; that is what we train today."
+Left: prompt → decode tokens → parse. Right: state + typed questions → one forward pass → probabilities.
+"Same transformer, different readout. A generator gives you a string to trust and parse after N passes. A decision model gives you a probability per option after one. TypeSafe sells this as Jev; Kev is the open clone we train."
 
-### 3. The three question types
-`choice` → probability per option. `noul` → P(true). `score` → distribution over ordered levels.
-Notes: "Options are text you write at call time. Ten questions in one call are answered independently, in one pass."
+### 3. Three question types
+`choice` → probability per option; `noul` → P(true); `score` → distribution over ordered levels.
+"Options are text you write at call time. Ten questions in one call are answered independently."
 
 ### 4. The game
-The 5x6 grid, Y at row 1, obstacles B P A scrolling up, altitude 3000 → 0, open at ≤ 1000 m.
-Notes: live `game.play --policy oracle --show`. "A state is 43 tokens. Obstacles come at you one row per tick."
+5x6 grid, Y on row 1, B/P/A deadly, C harmless, altitude 3000 → 0, open at ≤ 1000 m with a clear cell below.
+Live: `skyfall.py --policy oracle --fps 4`. "A state is 43 tokens."
 
-### 5. The rule (the oracle)
-The 15 lines of `game/oracle.py`, verbatim.
-Notes: "This is the teacher. It wins 95% of jumps. The model never sees the code, only states and the oracle's answers."
+### 5. The rule
+`game/oracle.py`, 15 lines. "The teacher. 95% of jumps. The model never sees the code."
 
 ### 6. The data
-One JSONL line, pretty-printed: state, `move` choice with three options and label, `open` noul with label.
-Numbers: 20,000 train / 2,000 eval, 45% dodge, 15% open, 40% idle; eval states excluded from train; every label re-derived by a test.
-Notes: "No gameplay was recorded. Rollouts with 30% random moves so the model also sees bad positions. The first generator leaked 42 eval states into train; a test caught it. Say that: it is the kind of thing an audience trusts you more for."
+One JSONL line; 20,000 / 2,000; mix 40% dodge, 15% open, 5% low-and-blocked, 40% idle.
+"Rollouts with 30% random moves. Two tests: every label re-derived from the grid; no eval grid in train. The first generator leaked 42 eval states and had an open label that was altitude alone. Reviews caught both."
 
 ### 7. Before: released Kev-0.8B, zero-shot
-Table row: move acc {{base_move_acc}}, open acc {{base_open_acc}}, Brier {{base_brier}}, win rate {{base_win}}.
-Clip: base model dying.
-Notes: "Same questions, same states, no training. It has never seen a grid. Chance on `move` is 0.33; on `open` always-false gets 0.83, so read the Brier, not the accuracy."
+2,000 held-out states: move 0.554 (= always stay), open 0.467 (worse than always no), Brier 0.57. Live: 0 of 200 jumps.
+"It has never seen a grid. Three bars at a third each; P(open) ≈ 0.5 everywhere; opens on tick one."
 
-### 8. Inside Kev (one slide, three pictures)
-(a) Packed sequence: `<state> … <q> instr <opt> o </opt> … <decide>` per question.
-(b) Block-causal mask: branches see the state and themselves, never each other.
-(c) Pointer head: `logits = (K·h_opts) · (Q·h_decide) / √256`, softmax.
-Notes: "Five rarely-used Qwen tokens reused as delimiters. The head is one attention query, the decision, over K keys, the options. That is why the option set can change per call: the head scores whatever option text you wrote. LoRA rank 16 on every linear layer, 11.3M trainable parameters out of 800M."
+### 8. Inside Kev
+(a) `<state> … <q> instr <opt> o </opt> … <decide>`; (b) block-causal mask; (c) `logits = (K·h_opts)·(Q·h_decide)/√256`.
+"Five reused Qwen special tokens. The head is one attention query over the options, so the option set can change per call. LoRA rank 16 on every linear layer: 11.3M of ~800M parameters, warm-started from the released checkpoint."
 
 ### 9. The training command
 ```
 kev.train --data train.jsonl --init_from jaredpalmer/kev-0.8b --base Qwen/Qwen3.5-0.8B-Base \
-  --epochs 1 --lr 2e-5 --batch 4 --accum 2 --device mps --dtype fp32
+  --epochs 1 --lr 2e-5 --batch 4 --accum 2 --device mps --dtype fp32 --lora_snapshot_every 100
 ```
-{{train_wallclock}} on an M2 Max; {{colab_wallclock}} on a Colab L4 in bf16.
-Notes: "Delta mode: warm-start the LoRA and head from the released checkpoint, then add our domain. Cross-entropy against the oracle's label. No reinforcement learning anywhere; this is imitation of a rule."
+5.8 h on an M2 Max (fp32, two kernels in fallback mode); ~20 min on an H100. 3.2 GB peak device memory. Checkpoint 62 MB.
+"Cross-entropy against the oracle's label. Imitation of a rule, not reinforcement learning."
 
-### 10. After: live
-Live `game.play --policy model --show` with probability bars, then `--episodes 200`.
-Table: before vs after vs oracle. {{table}}
-Notes: "Watch P(stay) collapse when something is under Y. Watch P(open) jump below 1000 m with a clear cell. Then the numbers over 2,000 held-out states and 200 jumps."
+### 10. Watching it learn
+`results/learning_curve.png` and `results/gifs/montage.gif`.
+Steps 100 / 300 / 700 / 1000 / 1300 / 2500: move 0.51 / 0.57 / 0.87 / 0.96 / 0.98 / 0.99; open 0.89 / 0.93 / 0.98 / 0.98 / 0.99 / 1.00; live wins 0 / 18% / 24% / 76% / 96% / 94%.
+"Altitude in 100 steps. Nothing on the grid until warm-up ends at step 250. At 700 it dodges but picks the wrong side: 16 of 96 'right' cases answered 'left'. By 1,300, parity with the rule."
 
-### 11. The balloon
-`--surprise` adds `O`, never in training. Win rate: oracle 0.93, fine-tuned {{ft_win_surprise}}.
-Notes: "Did it learn 'non-empty cell below' or the three letters? {{balloon_interpretation}}"
+### 11. After
+Live: `skyfall.py --policy model --fps 2`. Table: released vs final vs oracle (move 0.55 / 0.993 / 1; open 0.47 / 1.00 / 1; wins 0 / 94 / 97 per 100).
+"Two move errors in 300 states, both at exactly 1,000 m, the one altitude where the two rules interact."
 
-### 12. Why this architecture exists, and what it is not
-Latency per decision on the same machine and states: Kev {{kev_ms}} ms vs Qwen3.5-0.8B generating JSON {{gen_ms}} ms (and {{gen_move_acc}} accuracy).
+### 12. The balloon
+`--surprise`: 83 of 100 (oracle 97). Probe: P(stay) with one symbol below = 0.00 for B, P, A, Z, X; 0.33 for O; 0.61 for the digit 0.
+"It applies 'any other letter is deadly' to letters it never saw. It also learned that round hollow glyphs look like empty cells. We picked the one surprise symbol that looks like a hole."
+
+### 13. Why this architecture exists, and what it is not
+Latency per decision (same Mac, same states): fine-tuned Kev vs Gemini flash-lite vs Gemini with thinking; tokens and $ per 1,000 decisions; "rows fallen while thinking". Numbers: `results/table.md`.
 Caveats: a tiny CNN solves this grid; imitation not RL; Kev ≠ Jev; option-order sensitivity exists.
-Notes: "One forward pass versus a decoding loop plus parsing. The honest caveats are on the slide so nobody has to raise them for you."
+"One forward pass versus a decoding loop. The honest caveats are on the slide so nobody has to raise them."
 
 ### Backup
-- FAQ.md answers.
-- EXPLAINER.md §2–4 diagrams.
-- Error analysis: the states the fine-tune still gets wrong ({{error_pattern}}).
+FAQ.md; EXPLAINER.md §2–4; `results/final-confusion.txt` (the two remaining errors); the free-tier story (44% of Gemini decisions needed a retry).

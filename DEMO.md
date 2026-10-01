@@ -1,26 +1,38 @@
 # Demo: 30 minutes, what to run and what to say
 
-Before the talk: Kev server running on the **fine-tuned** checkpoint on port
-8009 (step 5 of `REPRODUCE.md`), a second terminal in the repo, the clips in
-`results/clips/` open as backup, `results/table.md` on a slide.
+## Before the talk (10 minutes)
+
+```bash
+cd skyfall-kev && export SKY="$PWD" && export KEV=../kev     # Kev clone, patched (REPRODUCE.md §0)
+tar -xzf skyfall-0.8b-checkpoint.tgz -C runs/                # from the GitHub release v0.1-final, or train it (REPRODUCE.md §4)
+cd "$KEV" && uv run --no-sync python -m kev.serve --run "$SKY/runs/skyfall-0.8b" --port 8010 &     # fine-tuned
+cd "$KEV" && uv run --no-sync python -m kev.serve --run jaredpalmer/kev-0.8b --port 8009 &          # released
+cd "$SKY" && python3 -m model.eval --url http://127.0.0.1:8010 --n 20 && python3 -m model.eval --url http://127.0.0.1:8009 --n 20   # both answer
+```
+
+Open `results/gifs/` in a file browser (backup for every live segment) and
+`results/learning_curve.png` and `results/table.md` on slides.
+
+## Run of show
 
 | Min | Do | Say |
 |---|---|---|
-| 0–4 | Slide: generator vs decision model | "Same transformer, different readout. State in, typed questions in, probabilities out, one forward pass. No decoding, no parsing." Point at the three question types. |
-| 4–8 | `python3 skyfall.py --policy oracle --fps 4` (in-place UI) then show `game/oracle.py` | "Five columns, six rows, you are Y, things scroll up at you. The rule is fifteen lines. That rule is the teacher." |
-| 8–11 | `python3 -m data.generate --train 20000 --eval 2000` then `head -1 data/eval.jsonl` | "Twenty thousand labelled states in a few seconds. Two typed questions per state. No gameplay was recorded; the oracle labels everything. Eval states are excluded from train and a test re-derives every label." |
-| 11–14 | Slide: the "before" row; play the base-model clip | "This is the released Kev-0.8B, zero-shot, same questions. It has never seen a grid. It dies in a few ticks." |
-| 14–18 | Slide: architecture (EXPLAINER §2–4), then the training command | "LoRA rank 16 on the frozen backbone plus a 2-layer pointer head, warm-started from the released checkpoint. Trained once on this laptop; the command is on screen." |
-| 18–24 | `python3 skyfall.py --policy model --fps 2` live (probability bars), then `python3 -m game.play --policy model --episodes 200` for the number | "Watch the probabilities. When nothing is below it, P(stay) is near one. When a bird appears, mass moves to a side. Below 1000 m with a clear cell, P(open) jumps." Then the table. |
-| 24–28 | `python3 skyfall.py --policy model --fps 2 --surprise`, then `python3 -m game.play --policy model --episodes 200 --surprise` | "A hot-air balloon it has never seen." Read the number. Then the latency slide and the caveats in EXPLAINER §9. |
-| 28–30 | Questions | FAQ.md has the answers. |
+| 0–3 | Slide 2–3 (generator vs decision model, three question types) | "Same transformer, different readout. State in, typed questions in, probabilities out, one forward pass. No decoding, no parsing. TypeSafe sells this as Jev; Kev is the open clone we train today." |
+| 3–7 | `python3 skyfall.py --policy oracle --fps 4`, then show `game/oracle.py` | "Five columns, six rows, you are Y, the sky scrolls up. B, P, A kill you, C is a cloud. Fifteen lines of rule. The rule is the teacher; it wins 95%." Press `q`. |
+| 7–10 | `python3 -m data.generate --train 20000 --eval 2000`, then `head -c 600 data/eval.jsonl` | "Twenty thousand labelled states in three seconds. Two typed questions per state. No gameplay recorded. A test re-derives every label from the grid, another forbids any eval grid from appearing in train. The first version leaked 42 states; the test caught it." |
+| 10–13 | `python3 skyfall.py --policy model --url http://127.0.0.1:8009 --fps 2` | "The released Kev, zero-shot, same questions. Three bars at a third each, P(open) a coin flip at every altitude. It opens on tick one. On 2,000 held-out states: move 0.55, which is the always-stay rate, open 0.47." Press `q` after one death. |
+| 13–17 | Slide 8 (architecture) and slide 9 (the command) | "Five reused special tokens delimit state, questions, options. Block-causal mask: questions never see each other. The head is one attention query, the decision, over K keys, the options. LoRA rank 16, 11.3M parameters, warm-started from the released checkpoint. One epoch, 5.8 hours on this Mac, 20 minutes on an H100." |
+| 17–21 | `open results/gifs/montage.gif`, then `results/learning_curve.png` | "Same jump, six brains. It learns the altitude rule in 100 steps, reads nothing on the grid until step 250, then climbs. At step 700 it dodges but picks the wrong side; by 1,300 it is at parity with the rule." |
+| 21–25 | `python3 skyfall.py --policy model --url http://127.0.0.1:8010 --fps 2` | "The final model. Watch P(stay) collapse when something is under Y, P(open) jump below 1,000 m. 94 of 100 jumps; the rule gets 97." Then the table slide. |
+| 25–28 | `python3 skyfall.py --policy model --url http://127.0.0.1:8010 --fps 2 --surprise` | "Balloons it never saw. 83 of 100. It applies 'any other letter is deadly' to Z and X it never saw either, but a round hollow O reads half like an empty cell. Of all symbols we could have chosen, we picked the one that looks like a hole." Then slide 12: latency and cost, caveats. |
+| 28–30 | Questions | `FAQ.md`. |
+
+## Numbers for the slides
+
+See `results/table.md` (generated by `scripts/make_table.py`) and `STORY.md`.
+Latency and cost per decision: `results/race-*.md` and the latency section of `results/table.md`.
 
 ## If something breaks
 
-- Server down: `results/gifs/` has every player recorded on the same seeds
-  (`scripts/record_gif.py`, headless; frame timing = real decision latency).
-- Numbers questioned: every row in `results/table.md` names its command.
-
-## The table (filled from results/)
-
-See `results/table.md`.
+- A server is down: every segment has a GIF in `results/gifs/` on seeds 7000–7002, including `montage.gif` and the balloon runs.
+- Numbers questioned: every row in `results/table.md` names its command; `steps/*.md` has the full trail.
