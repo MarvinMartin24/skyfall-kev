@@ -29,6 +29,7 @@ PRICES = {                            # list prices found 2026-09-30; check ai.g
     "gemini-2.5-pro": (1.25, 10.00),
     "gemini-3-flash": (0.50, 3.00),
     "gemini-3.7-flash": (0.75, 3.75),
+    "gemini-3.8-flash": (0.75, 3.75),   # assumed equal to 3.7-flash; verify on ai.google.dev/pricing
     "jev": (0.042, 0.0),              # TypeSafe's published Jev price: input only, output free
 }
 
@@ -59,7 +60,9 @@ def parse_answer(text):
 class GeminiPolicy:
     """One generateContent call per tick, JSON-constrained output, thinking off (fastest honest setting)."""
 
-    def __init__(self, model="gemini-2.5-flash", thinking_budget=0, timeout=60):
+    def __init__(self, model="gemini-3.8-flash", thinking=None, timeout=60):
+        """thinking: the thinkingConfig dict sent to the API, e.g. {"thinkingBudget": 0} (Gemini 2.x) or
+        {"thinkingLevel": "minimal"} (Gemini 3.x); None sends no thinkingConfig at all."""
         load_dotenv()
         self.key = os.environ.get("GEMINI_API_KEY")
         if not self.key:
@@ -69,28 +72,39 @@ class GeminiPolicy:
                         "responseSchema": {"type": "OBJECT", "properties": {"move": {"type": "STRING", "enum": ["left", "right", "stay"]},
                                                                              "open": {"type": "BOOLEAN"}}, "required": ["move", "open"]},
                         "temperature": 0}
-        if thinking_budget is not None:
-            self.gen_cfg["thinkingConfig"] = {"thinkingBudget": thinking_budget}
-        self.name = f"gemini:{model}"
+        if thinking:
+            self.gen_cfg["thinkingConfig"] = thinking
+        self.thinking = thinking
+        self.name = f"gemini:{model}" + (f":{'/'.join(str(v) for v in thinking.values())}" if thinking else "")
 
     def __call__(self, w):
         return self.decide(w.render())["action"]
 
-    def decide(self, state):
+    def decide(self, state, retries=6):
         body = {"contents": [{"role": "user", "parts": [{"text": PROMPT.format(
             state=state, move_q=QUESTIONS["move"]["instructions"], open_q=QUESTIONS["open"]["instructions"])}]}],
                 "generationConfig": self.gen_cfg}
         url = f"https://generativelanguage.googleapis.com/v1beta/models/{self.model}:generateContent"
-        req = urllib.request.Request(url, data=json.dumps(body).encode(),
-                                     headers={"Content-Type": "application/json", "x-goog-api-key": self.key})
-        t0 = time.perf_counter()
-        try:
-            with urllib.request.urlopen(req, timeout=self.timeout) as r:
-                resp = json.load(r)
-            err = None
-        except urllib.error.HTTPError as e:
-            resp, err = {}, f"HTTP {e.code}: {e.read()[:200]!r}"
-        ms = (time.perf_counter() - t0) * 1000
+        t_wall = time.perf_counter()
+        attempt, err, resp, ms = 0, None, {}, 0.0
+        while True:
+            req = urllib.request.Request(url, data=json.dumps(body).encode(),
+                                         headers={"Content-Type": "application/json", "x-goog-api-key": self.key})
+            t0 = time.perf_counter()
+            try:
+                with urllib.request.urlopen(req, timeout=self.timeout) as r:
+                    resp = json.load(r)
+                err = None
+            except urllib.error.HTTPError as e:
+                resp, err = {}, f"HTTP {e.code}: {e.read()[:160]!r}"
+            except (urllib.error.URLError, TimeoutError, OSError) as e:
+                resp, err = {}, f"{type(e).__name__}: {e}"
+            ms = (time.perf_counter() - t0) * 1000
+            if err is None or attempt >= retries or not any(c in err for c in ("503", "429", "500", "Timeout", "timed out")):
+                break
+            attempt += 1
+            time.sleep(min(1.0 * 2 ** (attempt - 1), 16.0))      # 503/429: back off and retry
+        wall_ms = (time.perf_counter() - t_wall) * 1000
         text = ""
         try:
             text = resp["candidates"][0]["content"]["parts"][0]["text"]
@@ -98,6 +112,6 @@ class GeminiPolicy:
             pass
         usage = resp.get("usageMetadata", {})
         action = parse_answer(text) or {"move": "stay", "open": False}     # unparseable -> do nothing
-        return {"action": action, "parsed": parse_answer(text) is not None, "latency_ms": ms, "error": err,
+        return {"action": action, "parsed": parse_answer(text) is not None, "latency_ms": ms, "wall_ms": wall_ms, "retries": attempt, "error": err,
                 "input_tokens": usage.get("promptTokenCount", 0), "output_tokens": usage.get("candidatesTokenCount", 0),
                 "thinking_tokens": usage.get("thoughtsTokenCount", 0), "raw": text[:200]}

@@ -49,9 +49,9 @@ class KevPlayer:
 
 
 class GeminiPlayer:
-    def __init__(self, model, price_in, price_out):
+    def __init__(self, model, price_in, price_out, thinking=None):
         from model.llm_policy import GeminiPolicy
-        self.p = GeminiPolicy(model)
+        self.p = GeminiPolicy(model, thinking=thinking)
         self.name, self.price = self.p.name, (price_in, price_out)
 
     def decide(self, w):
@@ -66,9 +66,10 @@ def make_player(spec, args):
         label, url = spec[4:].split(":", 1)
         return KevPlayer(label, url, *PRICES["jev"]) if args.kev_price == "jev" else KevPlayer(label, url)
     if spec.startswith("gemini"):
-        model = spec.split(":", 1)[1] if ":" in spec else "gemini-2.5-flash"
+        model = spec.split(":", 1)[1] if ":" in spec else "gemini-3.8-flash"
         pin, pout = (args.price_in, args.price_out) if args.price_in is not None else PRICES.get(model, (0.0, 0.0))
-        return GeminiPlayer(model, pin, pout)
+        thinking = {"none": None, "budget0": {"thinkingBudget": 0}, "minimal": {"thinkingLevel": "minimal"}, "low": {"thinkingLevel": "low"}}[args.gemini_thinking]
+        return GeminiPlayer(model, pin, pout, thinking)
     raise SystemExit(f"unknown player {spec}")
 
 
@@ -83,7 +84,8 @@ def run(player, seeds, surprise, log):
             a = d["action"]
             rows.append({"seed": seed, "tick": w.ticks, "alt": w.alt, "latency_ms": d["latency_ms"],
                          "in": d.get("input_tokens", 0), "out": d.get("output_tokens", 0), "think": d.get("thinking_tokens", 0),
-                         "parsed": d.get("parsed", True), "move_ok": a["move"] == truth["move"], "open_ok": a["open"] == truth["open"]})
+                         "parsed": d.get("parsed", True), "retries": d.get("retries", 0), "wall_ms": d.get("wall_ms", d["latency_ms"]),
+                         "move_ok": a["move"] == truth["move"], "open_ok": a["open"] == truth["open"]})
             t_air += d["latency_ms"]
             w.step(a["move"], a["open"])
         jumps.append({"seed": seed, "result": w.outcome[0], "reason": w.outcome[1], "ticks": w.ticks, "air_s": t_air / 1000})
@@ -95,7 +97,8 @@ def run(player, seeds, surprise, log):
     return {"player": player.name, "decisions": n, "jumps": len(jumps),
             "win_rate": sum(j["result"] == "win" for j in jumps) / len(jumps),
             "move_acc": sum(r["move_ok"] for r in rows) / n, "open_acc": sum(r["open_ok"] for r in rows) / n,
-            "parsed_rate": sum(r["parsed"] for r in rows) / n,
+            "parsed_rate": sum(r["parsed"] for r in rows) / n, "retries_per_decision": sum(r["retries"] for r in rows) / n,
+            "wall_ms_mean": statistics.mean(r["wall_ms"] for r in rows),
             "latency_ms_mean": statistics.mean(lat), "latency_ms_p50": statistics.median(lat), "latency_ms_p95": pct(lat, 0.95),
             "seconds_per_jump": statistics.mean(j["air_s"] for j in jumps),
             "rows_fallen_while_thinking": statistics.mean(lat) / TICK_MS,
@@ -121,6 +124,7 @@ def main():
     ap.add_argument("--surprise", action="store_true")
     ap.add_argument("--kev_price", choices=["local", "jev"], default="jev", help="price Kev tokens at 0 (local) or at Jev's list price")
     ap.add_argument("--price_in", type=float, default=None); ap.add_argument("--price_out", type=float, default=None)
+    ap.add_argument("--gemini_thinking", choices=["none", "budget0", "minimal", "low"], default="minimal", help="thinkingConfig sent to Gemini")
     ap.add_argument("--out", default="results/race")
     args = ap.parse_args()
     seeds = list(range(args.seed, args.seed + args.episodes))
