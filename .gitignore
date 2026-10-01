@@ -1,0 +1,7 @@
+data/*.jsonl
+runs/
+__pycache__/
+*.pyc
+.DS_Store
+.venv/
+results/*.jsonl
