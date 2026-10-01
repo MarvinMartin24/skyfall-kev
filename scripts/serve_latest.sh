@@ -9,7 +9,7 @@ RUN="${1:-skyfall-0.8b}"; PORT="${2:-8010}"
 current=""
 while true; do
   if [ -f "$SKY/runs/$RUN/head.pt" ]; then latest="$SKY/runs/$RUN"
-  else latest="$(ls -d "$SKY/runs/$RUN-snapshots"/step-* 2>/dev/null | sort -t- -k2 -n | tail -1)"; fi
+  else latest="$(ls -d "$SKY/runs/$RUN-snapshots"/step-* 2>/dev/null | awk -F'step-' '{print $NF" "$0}' | sort -n | tail -1 | cut -d' ' -f2-)"; fi   # numeric by step (text sort put step-900 after step-1300)
   if [ -n "$latest" ] && [ "$latest" != "$current" ] && [ -f "$latest/head.pt" ]; then
     echo "$(date +%H:%M:%S) serving $latest on :$PORT"
     pkill -f "kev.serve.*--port $PORT" 2>/dev/null; sleep 2
