@@ -9,3 +9,5 @@ results/*.jsonl
 .venv-wandb/
 wandb/
 .env
+!results/learning_curve.jsonl
+!results/winrate_curve.jsonl

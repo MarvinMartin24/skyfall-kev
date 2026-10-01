@@ -1,0 +1,10 @@
+{"step": 300, "snapshot": "step-300", "win_rate_50": 0.18, "mean_ticks": 10.0, "time": "2026-10-01 00:45"}
+{"step": 500, "snapshot": "step-500", "win_rate_50": 0.42, "mean_ticks": 14.2, "time": "2026-10-01 00:58"}
+{"step": 600, "snapshot": "step-600", "win_rate_50": 0.380, "mean_ticks": 14.6, "time": "2026-10-01 01:16"}
+{"step": 700, "snapshot": "step-700", "win_rate_50": 0.240, "mean_ticks": 12.6, "time": "2026-10-01 01:28"}
+{"step": 800, "snapshot": "step-800", "win_rate_50": 0.580, "mean_ticks": 17.2, "time": "2026-10-01 01:42"}
+{"step": 900, "snapshot": "step-900", "win_rate_50": 0.740, "mean_ticks": 18.2, "time": "2026-10-01 01:56"}
+{"step": 1000, "snapshot": "step-1000", "win_rate_50": 0.760, "mean_ticks": 18.9, "time": "2026-10-01 02:53", "backfilled": true}
+{"step": 1300, "snapshot": "step-1300", "win_rate_50": 0.960, "mean_ticks": 20.8, "time": "2026-10-01 02:53"}
+{"step": 1100, "snapshot": "step-1100", "win_rate_50": 0.820, "mean_ticks": 19.1, "time": "2026-10-01 02:55", "backfilled": true}
+{"step": 1200, "snapshot": "step-1200", "win_rate_50": 0.860, "mean_ticks": 19.9, "time": "2026-10-01 02:58", "backfilled": true}
