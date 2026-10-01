@@ -33,4 +33,20 @@ oracle, balanced, and proven to load in Kev's own loader without edits.
 - Kev installed locally with `uv sync --extra serve`: torch 2.8.0, transformers 5.17.0, `mps` available.
 
 ## Review
-_(filled after execution)_
+Independent reviewer (read-only, regenerated the files under several hash seeds,
+measured overlaps with scripts). Verdict: **ACCEPT**, with two findings we acted on:
+
+| # | Severity | Finding | Action |
+|---|---|---|---|
+| 1 | risk | Seed disjointness alone leaks 2.1% of eval states into train (initial grids are not uniform); only the explicit `exclude` prevents it. | Already fixed by the `exclude` path; test keeps it fixed. |
+| 2 | risk | Exclusion was exact-text only: 9.1% of eval rows had the same grid in train at another altitude, 8% on the same side of 1000 m, i.e. identical decision inputs. | **Fixed**: exclusion keyed on (grid, altitude <= 1000). New test asserts zero key overlap. |
+| 3 | ok | Labels are always the oracle's for the recorded state (22,000/22,000 re-derived). | None. |
+| 4 | nit | Dodge rows at <= 1000 m had `open=True`, so the open-true share was 16.8%, not 15%. | Resolved by the rule change below (open now implies stay). |
+| 5 | design | `open` was equivalent to `altitude <= 1000` in the data (the oracle sidestepped and opened in the same tick), so the "cell below is empty" clause was never tested. | **Rule changed**: open only when the cell directly below is already empty; sidestep first otherwise. Each question is now a pure function of the state. New test requires >= 50 eval rows at low altitude with `open=False`. |
+| 6 | nit | An idle-bucket shortfall would silently truncate the file. | Fixed: loop waits on every bucket and asserts the row count. |
+| 7 | ok | Byte-for-byte deterministic across hash seeds. | None. |
+| 8 | nit | Eval slightly sparser than train (3.59 vs 3.68 obstacles per state) because dedupe pressure scales with split size. | Noted; not material. |
+| 9 | nit | `noul` questions carry no `criteria`; Kev's loader does not require it. PLAN wording tightened. | Fixed. |
+
+Consequence: data regenerated, and the baseline benchmark and fine-tune were
+restarted on the new files (about 10 minutes of training lost).

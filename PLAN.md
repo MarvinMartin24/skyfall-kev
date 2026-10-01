@@ -50,7 +50,10 @@ A . . . .
 1. If the cell below you is empty, stay.
 2. Otherwise step sideways, toward the centre first, into a column whose
    current cell and cell below are both empty.
-3. Open only at or below 1000 m, and only when the cell below is empty.
+3. Open only at or below 1000 m, and only when the cell directly below you
+   is already empty. If something is below you, sidestep this tick and open
+   on a later one. (Each question is a pure function of the state, matching
+   how Kev answers questions: independently of each other.)
 
 Measured: oracle wins 95% of 500 seeded jumps, random policy wins 0.2%.
 With the surprise balloon, on identical layouts, the oracle still wins 95%,
@@ -106,7 +109,7 @@ probability and regenerate.
 **Day 1, Thu Oct 1: Colab and the base model.**
 - Colab Pro, L4. First cell: `torch.cuda.is_bf16_supported()` must be True.
 - `pip install uv`, clone Kev, `uv sync --extra serve`. Mount Drive, all outputs under Drive.
-- Data format already verified against `kev/data.py` (state may be a plain string, questions need `type`, `instructions`, `criteria`, `label`). `kev.train --data`, `kev.benchmark --data` and the `/v1/systemone` response shapes verified too. Commands are in `colab/train.sh`.
+- Data format already verified against `kev/data.py` (state may be a plain string; every question needs `type` and `label`; `choice` needs `criteria`, `noul` does not). `kev.train --data`, `kev.benchmark --data` and the `/v1/systemone` response shapes verified too. Commands are in `colab/train.sh`.
 - One thing to check on the Hub before training: that `--base` in `colab/train.sh` matches the base model `jaredpalmer/kev-0.8b` was trained on (its `training_config.json`).
 - `kev.benchmark --run jaredpalmer/kev-0.8b` on `eval.jsonl`. Record the zero-shot row.
 - Write `model/client.py` against `kev.serve`, run `play.py --policy model` with the base checkpoint, 200 jumps. Record win rate. Record a 20-second terminal clip of it dying.

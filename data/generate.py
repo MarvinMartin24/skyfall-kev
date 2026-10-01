@@ -3,9 +3,17 @@
 python -m data.generate --train 20000 --eval 2000
 """
 import argparse, json, random
-from game.sim import World
+from game.sim import World, OPEN_ALT
 from game.oracle import oracle
 from data.questions import QUESTIONS
+
+
+def key(text):
+    """The decision-relevant content of a state: the grid, and which side of 1000 m it is on.
+    Two states with equal keys have identical oracle labels, so cross-split exclusion is keyed on it
+    (exact-text exclusion alone left 9% of eval grids in train at another altitude)."""
+    alt_line, grid = text.split("\n", 1)
+    return f"{int(alt_line.split(': ')[1]) <= OPEN_ALT}|{grid}"
 
 
 def example(w, labels):
@@ -20,18 +28,18 @@ def collect(seed_start, n_target, eps=0.3, mix=(0.45, 0.15, 0.40), exclude=froze
     Labels always come from the oracle. Three buckets, mixed to fixed ratios:
       dodge: move != stay        open: move == stay and open == True
       idle:  everything else (stay, no open)
-    States in `exclude` (e.g. the eval set) are never emitted."""
+    States whose key() is in `exclude` (the eval set's keys) are never emitted."""
     rng = random.Random(seed_start)
-    seen, buckets = set(exclude), {"dodge": [], "open": [], "idle": []}
+    seen, buckets = set(), {"dodge": [], "open": [], "idle": []}
     need = {k: int(n_target * f) for k, f in zip(buckets, mix)}
     need["idle"] = n_target - need["dodge"] - need["open"]
     seed = seed_start
-    while any(len(buckets[k]) < need[k] for k in ("dodge", "open")):
+    while any(len(buckets[k]) < need[k] for k in buckets):
         w = World(seed=seed); seed += 1
         while not w.done:
             lab = oracle(w)
             text = w.render()
-            if text not in seen:
+            if text not in seen and key(text) not in exclude:
                 seen.add(text)
                 k = "dodge" if lab["move"] != "stay" else ("open" if lab["open"] else "idle")
                 buckets[k].append(example(w, lab))
@@ -47,17 +55,21 @@ def collect(seed_start, n_target, eps=0.3, mix=(0.45, 0.15, 0.40), exclude=froze
     for k in buckets:
         rng.shuffle(buckets[k]); rows += buckets[k][: need[k]]
     rng.shuffle(rows)
+    assert len(rows) == n_target, (len(rows), n_target)
     return rows
 
 
 def stats(rows):
     n = len(rows)
     mv = {k: 0 for k in ("left", "right", "stay")}
-    op = 0
+    op, low_not_open = 0, 0
     for r in rows:
         mv[r["questions"]["move"]["label"]] += 1
         op += r["questions"]["open"]["label"]
-    return {"n": n, "move": {k: round(v / n, 3) for k, v in mv.items()}, "open_true": round(op / n, 3)}
+        low = int(r["state"].split("\n", 1)[0].split(": ")[1]) <= OPEN_ALT
+        low_not_open += low and not r["questions"]["open"]["label"]
+    return {"n": n, "move": {k: round(v / n, 3) for k, v in mv.items()}, "open_true": round(op / n, 3),
+            "low_alt_but_blocked": round(low_not_open / n, 3)}
 
 
 def main():
@@ -68,7 +80,7 @@ def main():
     a = p.parse_args()
     # eval first, then train with every eval state excluded: no leakage across splits
     eval_rows = collect(2_000_000, a.eval)
-    train_rows = collect(1_000_000, a.train, exclude=frozenset(r["state"] for r in eval_rows))
+    train_rows = collect(1_000_000, a.train, exclude=frozenset(key(r["state"]) for r in eval_rows))
     for name, rows in (("train", train_rows), ("eval", eval_rows)):
         path = f"{a.out}/{name}.jsonl"
         with open(path, "w") as f:

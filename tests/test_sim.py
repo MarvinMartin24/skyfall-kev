@@ -35,8 +35,8 @@ def test_open_rules():
     w = World(seed=1, spawn_prob=0.0)
     w.alt = OPEN_ALT
     w.grid[PLAYER_ROW + 1][w.col] = "P"
-    assert oracle(w) == {"move": "right", "open": True}     # sidestep, then open in the clear column
-    assert w.step("right", True) == ("win", "safe_landing")
+    assert oracle(w) == {"move": "right", "open": False}    # sidestep first, open on a later tick
+    assert w.step("right", False) is None
 
 
 def test_ground():

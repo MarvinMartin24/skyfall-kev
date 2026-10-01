@@ -4,8 +4,11 @@ Rule, in words:
   1. If the cell below you is empty, stay.
   2. Otherwise step sideways, toward the centre of the grid first, into a
      column whose current cell and cell below are both empty.
-  3. Open the parachute only at or below 1000 m, and only when the cell below
-     (after your move) is empty.
+  3. Open the parachute only at or below 1000 m, and only when the cell
+     directly below you is already empty. If something is below you, sidestep
+     this tick and open on a later one.
+Each answer is a pure function of the state, which is how Kev answers them:
+the two questions never see each other.
 """
 from game.sim import WIDTH, EMPTY, PLAYER_ROW, OPEN_ALT
 
@@ -27,6 +30,5 @@ def oracle(w):
         move = other
     else:
         move = "stay"
-    new_col = min(WIDTH - 1, max(0, col + delta.get(move, 0)))
-    open_ = w.alt <= OPEN_ALT and w.cell(PLAYER_ROW + 1, new_col) == EMPTY
+    open_ = w.alt <= OPEN_ALT and w.cell(PLAYER_ROW + 1, col) == EMPTY
     return {"move": move, "open": open_}
