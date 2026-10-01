@@ -32,9 +32,10 @@ def run_episode(make_policy, seed, surprise=False, show=False):
     policy = make_policy(seed)
     w = World(seed=seed, surprise=surprise)
     while not w.done:
+        if show:
+            print(w.render())          # show the state first, then decide (matters for --policy human)
         a = policy(w)
         if show:
-            print(w.render())
             print(f"-> move={a['move']} open={a['open']}\n")
         w.step(a["move"], a["open"])
     if show:
@@ -58,7 +59,8 @@ def main():
     if args.policy == "human":
         args.show = True
         make_policy = human_policy
-        print("You are Y. Obstacles scroll UP one row per tick. Open (o) only at or below 1000 m with an empty cell below you.\n")
+        print("You are Y. Obstacles scroll UP one row per tick. Reach 1000 m or lower, then press o to open the parachute\n"
+              "while the cell directly below you is empty. Hitting the ground (altitude 0) without opening loses.\n")
     elif args.policy == "oracle":
         make_policy = lambda seed: oracle
     elif args.policy == "random":
