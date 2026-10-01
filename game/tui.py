@@ -3,6 +3,7 @@
   python3 skyfall.py                                   # you play
   python3 skyfall.py --policy oracle --fps 4           # watch the rule
   python3 skyfall.py --policy model --fps 2 [--surprise] [--url http://127.0.0.1:8009]
+  python3 skyfall.py --policy gemini --episodes 10 [--gemini_model gemini-flash-lite-latest]   # an LLM call per tick
 
 Keys: a / ←  left     d / →  right     s / enter / ↓  stay     space / o  open
       h  toggle the rule's hint     r  replay (next seed)     q  quit
@@ -115,6 +116,15 @@ def frame(w, st, emoji):
         for k in ("left", "right", "stay"):
             hud.append(f"P({k:<5}) {bar(pr['move'][k], 12, E + '36m')}")
         hud.append(f"P(open ) {bar(pr['open'], 12, E + '32m')}")
+    if st.get("llm") is not None:
+        L = st["llm"]
+        hud.append("")
+        if L.get("status"):
+            hud.append(E + "1;33m" + L["status"] + RESET)
+        if L.get("latency_ms") is not None:
+            hud.append(f"last call {L['latency_ms']:6.0f} ms   fell {L['latency_ms'] / 100:4.1f} rows while thinking (100 ms/row)")
+            hud.append(f"tokens {L['in']}→{L['out']}" + (f"+{L['think']} thinking" if L.get("think") else "") + (f"   retries {L['retries']}" if L.get("retries") else ""))
+        hud.append(f"served by {L.get('model_version') or '?'}   cost so far ${L['cost']:.4f} (list price)   {L['calls']} calls")
     if st.get("banner"):
         hud += ["", st["banner"]]
 
@@ -145,7 +155,8 @@ def banner_for(outcome):
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--policy", choices=["human", "oracle", "model"], default="human")
+    ap.add_argument("--policy", choices=["human", "oracle", "model", "gemini"], default="human")
+    ap.add_argument("--gemini_model", default="gemini-flash-lite-latest")
     ap.add_argument("--seed", type=int, default=1000)
     ap.add_argument("--episodes", type=int, default=0, help="auto policies: stop after N jumps (0 = until q)")
     ap.add_argument("--fps", type=float, default=3.0, help="auto policies: ticks per second")
@@ -159,8 +170,14 @@ def main():
 
     if args.policy == "model":
         from model.client import ask, probs
-    who = {"human": "you", "oracle": "the rule (oracle)", "model": f"fine-tuned Kev @ {args.url}"}[args.policy]
-    st = {"seed": args.seed, "wins": 0, "n": 0, "who": who, "hint": None, "probs": None, "last": None, "banner": None}
+    gp = None
+    if args.policy == "gemini":
+        from model.llm_policy import GeminiPolicy, PRICES
+        gp = GeminiPolicy(args.gemini_model, thinking=None)
+        price = PRICES.get(args.gemini_model, (0.0, 0.0))
+    who = {"human": "you", "oracle": "the rule (oracle)", "model": f"Kev @ {args.url}", "gemini": f"Gemini ({args.gemini_model}), one API call per tick"}[args.policy]
+    st = {"seed": args.seed, "wins": 0, "n": 0, "who": who, "hint": None, "probs": None, "last": None, "banner": None,
+          "llm": {"cost": 0.0, "calls": 0} if gp else None}
     hint_on = args.hint
     with Keys() as keys:
         while True:
@@ -171,7 +188,18 @@ def main():
                 st["hint"] = oracle(w) if hint_on else None
                 if args.policy == "model":
                     st["probs"] = probs(ask(args.url, w.render()))
+                if gp:
+                    st["llm"]["status"] = "Gemini is thinking..."
                 draw(w, st, args.emoji)
+                if gp:
+                    d = gp.decide(w.render())
+                    L = st["llm"]
+                    L.update(status=None, latency_ms=d["latency_ms"], **{"in": d["input_tokens"], "out": d["output_tokens"]},
+                             think=d["thinking_tokens"], retries=d["retries"], model_version=d.get("model_version"), calls=L["calls"] + 1,
+                             cost=L["cost"] + (d["input_tokens"] * price[0] + (d["output_tokens"] + d["thinking_tokens"]) * price[1]) / 1e6)
+                    if d["error"] and not d["parsed"]:
+                        L["status"] = "API error, defaulted to stay: " + d["error"][:50]
+                    draw(w, st, args.emoji)
                 if args.policy == "human":
                     while True:
                         k = keys.get()
@@ -187,10 +215,12 @@ def main():
                 else:
                     if args.policy == "oracle":
                         a = oracle(w)
+                    elif gp:
+                        a = d["action"]
                     else:
                         pr = st["probs"]
                         a = {"move": max(pr["move"], key=pr["move"].get), "open": pr["open"] >= 0.5}
-                    k = keys.get(timeout=1.0 / args.fps)
+                    k = keys.get(timeout=0.05 if gp else 1.0 / args.fps)
                     if k == "q":
                         quit_now = True; break
                 w.step(a["move"], a["open"])
