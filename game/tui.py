@@ -193,7 +193,11 @@ def main():
                     st["llm"]["status"] = "Gemini is thinking..."
                 draw(w, st, args.emoji)
                 if gp:
-                    d = gp.decide(w.render())
+                    def on_retry(attempt, wait, err, _w=w):
+                        code = "rate limited (429)" if "429" in (err or "") else "overloaded (503)" if "503" in (err or "") else (err or "")[:30]
+                        st["llm"]["status"] = f"API {code}: retry {attempt} in {wait:.0f}s  (free tier)"
+                        draw(_w, st, args.emoji)
+                    d = gp.decide(w.render(), on_retry=on_retry)
                     L = st["llm"]
                     L.update(status=None, latency_ms=d["latency_ms"], **{"in": d["input_tokens"], "out": d["output_tokens"]},
                              think=d["thinking_tokens"], retries=d["retries"], model_version=d.get("model_version"), calls=L["calls"] + 1,

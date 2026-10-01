@@ -150,7 +150,8 @@ class GeminiPolicy:
     def __call__(self, w):
         return self.decide(w.render())["action"]
 
-    def decide(self, state, retries=6):
+    def decide(self, state, retries=6, on_retry=None):
+        """on_retry(attempt, wait_seconds, error) is called before each back-off sleep (UI feedback)."""
         body = {"contents": [{"role": "user", "parts": [{"text": build_prompt(self.prompt, state)}]}],
                 "generationConfig": self.gen_cfg}
         url = f"https://generativelanguage.googleapis.com/v1beta/models/{self.model}:generateContent"
@@ -172,7 +173,10 @@ class GeminiPolicy:
             if err is None or attempt >= retries or not any(c in err for c in ("503", "429", "500", "Timeout", "timed out")):
                 break
             attempt += 1
-            time.sleep(min(1.0 * 2 ** (attempt - 1), 16.0))      # 503/429: back off and retry
+            wait = min(1.0 * 2 ** (attempt - 1), 16.0)            # 503/429: back off and retry
+            if on_retry:
+                on_retry(attempt, wait, err)
+            time.sleep(wait)
         wall_ms = (time.perf_counter() - t_wall) * 1000
         text = ""
         try:
