@@ -1,0 +1,307 @@
+{
+ "args": {
+  "players": "oracle,kev-base:http://127.0.0.1:8009,gemini:gemini-flash-lite-latest",
+  "episodes": 10,
+  "seed": 5000,
+  "surprise": false,
+  "kev_price": "jev",
+  "price_in": null,
+  "price_out": null,
+  "gemini_thinking": "none",
+  "out": "results/race-base-vs-gemini-lite"
+ },
+ "tick_ms": 100,
+ "results": [
+  {
+   "player": "oracle",
+   "model_version": null,
+   "decisions": 212,
+   "jumps": 10,
+   "win_rate": 1.0,
+   "move_acc": 1.0,
+   "open_acc": 1.0,
+   "parsed_rate": 1.0,
+   "retries_per_decision": 0.0,
+   "wall_ms_mean": 0.0006435235849056346,
+   "latency_ms_mean": 0.0006435235849056346,
+   "latency_ms_p50": 0.0005420000000061487,
+   "latency_ms_p95": 0.0011249999999907168,
+   "seconds_per_jump": 1.3642699999999452e-05,
+   "rows_fallen_while_thinking": 6.435235849056346e-06,
+   "tokens_in_per_decision": 0,
+   "tokens_out_per_decision": 0,
+   "usd_per_1000_decisions": 0.0,
+   "usd_per_jump": 0.0,
+   "price_per_mtok": {
+    "in": 0.0,
+    "out": 0.0
+   },
+   "jumps_detail": [
+    {
+     "seed": 5000,
+     "result": "win",
+     "reason": "safe_landing",
+     "ticks": 21,
+     "air_s": 1.333200000003254e-05
+    },
+    {
+     "seed": 5001,
+     "result": "win",
+     "reason": "safe_landing",
+     "ticks": 21,
+     "air_s": 1.4002999999943033e-05
+    },
+    {
+     "seed": 5002,
+     "result": "win",
+     "reason": "safe_landing",
+     "ticks": 21,
+     "air_s": 1.2502000000011448e-05
+    },
+    {
+     "seed": 5003,
+     "result": "win",
+     "reason": "safe_landing",
+     "ticks": 23,
+     "air_s": 1.6044000000048353e-05
+    },
+    {
+     "seed": 5004,
+     "result": "win",
+     "reason": "safe_landing",
+     "ticks": 21,
+     "air_s": 1.608199999997284e-05
+    },
+    {
+     "seed": 5005,
+     "result": "win",
+     "reason": "safe_landing",
+     "ticks": 21,
+     "air_s": 1.2874999999995529e-05
+    },
+    {
+     "seed": 5006,
+     "result": "win",
+     "reason": "safe_landing",
+     "ticks": 21,
+     "air_s": 1.1585000000022272e-05
+    },
+    {
+     "seed": 5007,
+     "result": "win",
+     "reason": "safe_landing",
+     "ticks": 21,
+     "air_s": 1.3586000000009868e-05
+    },
+    {
+     "seed": 5008,
+     "result": "win",
+     "reason": "safe_landing",
+     "ticks": 21,
+     "air_s": 1.3125000000002718e-05
+    },
+    {
+     "seed": 5009,
+     "result": "win",
+     "reason": "safe_landing",
+     "ticks": 21,
+     "air_s": 1.3292999999955923e-05
+    }
+   ]
+  },
+  {
+   "player": "kev-base",
+   "model_version": null,
+   "decisions": 10,
+   "jumps": 10,
+   "win_rate": 0.0,
+   "move_acc": 0.8,
+   "open_acc": 0.0,
+   "parsed_rate": 1.0,
+   "retries_per_decision": 0.0,
+   "wall_ms_mean": 301.6,
+   "latency_ms_mean": 301.6,
+   "latency_ms_p50": 280.45,
+   "latency_ms_p95": 474.5,
+   "seconds_per_jump": 0.3016,
+   "rows_fallen_while_thinking": 3.016,
+   "tokens_in_per_decision": 179,
+   "tokens_out_per_decision": 84.5,
+   "usd_per_1000_decisions": 0.007518,
+   "usd_per_jump": 7.518000000000001e-06,
+   "price_per_mtok": {
+    "in": 0.042,
+    "out": 0.0
+   },
+   "jumps_detail": [
+    {
+     "seed": 5000,
+     "result": "lose",
+     "reason": "opened_too_high",
+     "ticks": 1,
+     "air_s": 0.3579
+    },
+    {
+     "seed": 5001,
+     "result": "lose",
+     "reason": "opened_too_high",
+     "ticks": 1,
+     "air_s": 0.3416
+    },
+    {
+     "seed": 5002,
+     "result": "lose",
+     "reason": "opened_too_high",
+     "ticks": 1,
+     "air_s": 0.4745
+    },
+    {
+     "seed": 5003,
+     "result": "lose",
+     "reason": "opened_too_high",
+     "ticks": 1,
+     "air_s": 0.249
+    },
+    {
+     "seed": 5004,
+     "result": "lose",
+     "reason": "opened_too_high",
+     "ticks": 1,
+     "air_s": 0.2047
+    },
+    {
+     "seed": 5005,
+     "result": "lose",
+     "reason": "opened_too_high",
+     "ticks": 1,
+     "air_s": 0.30689999999999995
+    },
+    {
+     "seed": 5006,
+     "result": "lose",
+     "reason": "opened_too_high",
+     "ticks": 1,
+     "air_s": 0.254
+    },
+    {
+     "seed": 5007,
+     "result": "lose",
+     "reason": "opened_too_high",
+     "ticks": 1,
+     "air_s": 0.2371
+    },
+    {
+     "seed": 5008,
+     "result": "lose",
+     "reason": "opened_too_high",
+     "ticks": 1,
+     "air_s": 0.3425
+    },
+    {
+     "seed": 5009,
+     "result": "lose",
+     "reason": "opened_too_high",
+     "ticks": 1,
+     "air_s": 0.24780000000000002
+    }
+   ]
+  },
+  {
+   "player": "gemini:gemini-flash-lite-latest",
+   "model_version": "gemini-3.5-flash-lite",
+   "decisions": 41,
+   "jumps": 10,
+   "win_rate": 0.0,
+   "move_acc": 0.36585365853658536,
+   "open_acc": 1.0,
+   "parsed_rate": 1.0,
+   "retries_per_decision": 0.43902439024390244,
+   "wall_ms_mean": 2529.931442,
+   "latency_ms_mean": 750.8413516097568,
+   "latency_ms_p50": 745.296125000003,
+   "latency_ms_p95": 913.8295000000003,
+   "seconds_per_jump": 3.078449541600003,
+   "rows_fallen_while_thinking": 7.508413516097567,
+   "tokens_in_per_decision": 198,
+   "tokens_out_per_decision": 13.926829268292684,
+   "usd_per_1000_decisions": 0.07039024390243903,
+   "usd_per_jump": 0.0002886,
+   "price_per_mtok": {
+    "in": 0.25,
+    "out": 1.5
+   },
+   "jumps_detail": [
+    {
+     "seed": 5000,
+     "result": "lose",
+     "reason": "hit_A",
+     "ticks": 7,
+     "air_s": 5.719649250000001
+    },
+    {
+     "seed": 5001,
+     "result": "lose",
+     "reason": "hit_B",
+     "ticks": 2,
+     "air_s": 1.3107642499999983
+    },
+    {
+     "seed": 5002,
+     "result": "lose",
+     "reason": "hit_A",
+     "ticks": 3,
+     "air_s": 2.1285439569999998
+    },
+    {
+     "seed": 5003,
+     "result": "lose",
+     "reason": "hit_A",
+     "ticks": 8,
+     "air_s": 6.109891292000009
+    },
+    {
+     "seed": 5004,
+     "result": "lose",
+     "reason": "hit_P",
+     "ticks": 2,
+     "air_s": 1.4024875839999993
+    },
+    {
+     "seed": 5005,
+     "result": "lose",
+     "reason": "hit_B",
+     "ticks": 1,
+     "air_s": 0.6707379170000037
+    },
+    {
+     "seed": 5006,
+     "result": "lose",
+     "reason": "hit_A",
+     "ticks": 2,
+     "air_s": 1.3198025410000087
+    },
+    {
+     "seed": 5007,
+     "result": "lose",
+     "reason": "hit_P",
+     "ticks": 9,
+     "air_s": 6.84506900000001
+    },
+    {
+     "seed": 5008,
+     "result": "lose",
+     "reason": "hit_B",
+     "ticks": 1,
+     "air_s": 0.7976763339999947
+    },
+    {
+     "seed": 5009,
+     "result": "lose",
+     "reason": "hit_P",
+     "ticks": 6,
+     "air_s": 4.479873291000004
+    }
+   ]
+  }
+ ]
+}
