@@ -102,6 +102,10 @@ jump can be watched with a progressively better brain.
 | 500 | 4,000 | 0.94 | 0.77 (Brier 0.28) |
 | 600 | 4,800 | 0.95 | 0.86 (Brier 0.21) |
 | 700 | 5,600 | 0.98 | 0.87 (Brier 0.21) |
+| 800 | 6,400 | 0.98 | 0.92 (Brier 0.13) |
+| 900 | 7,200 | 0.97 | 0.90 (Brier 0.18) |
+| 1000 | 8,000 | 0.98 | 0.96 (Brier 0.07) |
+| 1300 | 10,400 | 0.99 | 0.98 (Brier 0.04) |
 
 The model learned the altitude rule almost immediately and, for the first
 250 steps, did not read the grid at all. It always says "stay" and flies into the first obstacle.
@@ -121,7 +125,9 @@ warm-up is not a reason to touch the learning rate; look at the curve one or
 two snapshots later.
 
 Win rates on live jumps (50 seeded jumps per snapshot): released Kev 0/200,
-step 300: 18%, step 500: 42%, step 600: 38%, step 700: 24%, oracle 95%.
+step 300: 18%, step 500: 42%, step 600: 38%, step 700: 24%, step 800: 58%,
+step 900: 74%, step 1000: 76%, **step 1300: 96%**, oracle 95% (the oracle has
+no lookahead; the model imitates it, so parity is the ceiling).
 
 The dip at step 700 while held-out accuracy kept rising is instructive. The
 confusion matrix on 300 states says why: every "left" case is right, but in
@@ -181,5 +187,27 @@ retry, so the wall time per decision was 2.5 s.
 - An LLM can play this, but only by thinking, and thinking is what you pay
   for in time and tokens. The decision model's job is to not need it.
 
-_(continued as results land: learning curve, final model, balloon test, the
-full race)_
+## 9. Step 1,300: it flies (Oct 1, 02:53)
+
+Three quarters of an hour after the plateau broke, the snapshot at step 1,300
+lands 48 of 50 jumps. On 300 held-out states it makes 7 move errors and 4
+open errors, and the wrong-side dodges are gone (zero left/right confusions).
+The success bar from `PLAN.md` (move >= 0.90, open >= 0.95, win rate >= 0.60)
+is cleared with 1,200 steps of training still to go.
+
+**The balloon test, first pass.** Same 50 seeds with hot-air balloons `O`
+swapped into a quarter of the obstacles: 39 wins. Six deaths were balloons,
+five were ordinary obstacles. The oracle wins 49 of the same 50. So the
+model mostly applies "any other letter is deadly" to a letter it never saw,
+but not always. A direct probe makes it concrete: with only one symbol placed
+directly below `Y`, mean P(stay) is 1.00 for `.` and `C`, 0.00 for `B`, `P`,
+`A` and for `Z` (another never-seen letter), and 0.11 for `O`. It generalises
+the rule; `O` specifically is slightly ambiguous to it, perhaps because `O`
+reads as a round, empty-looking glyph. That is a better slide than a clean
+pass would have been.
+
+One infrastructure note for honesty: the snapshot server stuck on step 900
+for an hour because a text sort put `step-900` after `step-1300`. The
+skipped snapshots were backfilled on a side port; the curve is complete.
+
+_(continued as results land: final model, the full race)_
