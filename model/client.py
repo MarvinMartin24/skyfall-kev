@@ -19,8 +19,15 @@ def ask(url, state, questions=QUESTIONS, model="kev-latest", timeout=30):
     if key:
         req.add_header("Authorization", f"Bearer {key}")
     t0 = time.perf_counter()
-    with urllib.request.urlopen(req, timeout=timeout) as r:
-        resp = json.load(r)
+    for attempt in range(20):                       # the server may be restarting on a newer snapshot: wait for it
+        try:
+            with urllib.request.urlopen(req, timeout=timeout) as r:
+                resp = json.load(r)
+            break
+        except (urllib.error.URLError, ConnectionError, TimeoutError) as e:
+            if attempt == 19:
+                raise
+            time.sleep(3)
     resp["_client_ms"] = (time.perf_counter() - t0) * 1000
     return resp
 
