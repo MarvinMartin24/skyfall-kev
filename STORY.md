@@ -99,6 +99,7 @@ jump can be watched with a progressively better brain.
 | 200 | 1,600 | 0.93 | 0.50 |
 | 300 | 2,400 | 0.93 | 0.57 (Brier 0.53, first real movement) |
 | 400 | 3,200 | 0.94 | 0.69 (Brier 0.37) |
+| 500 | 4,000 | 0.94 | 0.77 (Brier 0.28) |
 
 The model learned the altitude rule almost immediately and, for the first
 250 steps, did not read the grid at all. It always says "stay" and flies into the first obstacle.
