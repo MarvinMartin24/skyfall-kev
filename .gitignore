@@ -7,3 +7,4 @@ __pycache__/
 results/*.jsonl
 .venv-wandb/
 wandb/
+.env

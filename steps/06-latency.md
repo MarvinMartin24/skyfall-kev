@@ -1,9 +1,19 @@
-# Step 06: Latency, decision model vs text generation
+# Step 06: The race. Latency, tokens and cost: decision model vs LLM calls
 
 ## Goal
-One honest number pair for the closing slide: milliseconds per decision for
-the fine-tuned Kev (one forward pass, both questions) vs the same backbone
-asked to *generate* the answer as text and parse it.
+The closing slide: the same seeded jumps played by the oracle, released Kev,
+fine-tuned Kev and a hosted LLM (Gemini), with per decision latency, tokens,
+cost, agreement with the oracle, and "time as gravity": how long the skydiver
+is in the air if the sky waits for each decision.
+
+Tool: `model/bench.py` (`results/race.md`). Players: `oracle`, `kev-<label>:<url>`,
+`gemini[:<model>]`. Kev tokens priced at Jev's list price ($0.042/M input, output
+free) or $0 local; Gemini at list price. The Gemini key is read from the
+environment or `.env`, never from chat.
+
+Metrics per player: win rate, move/open agreement with the oracle, latency p50/p95
+per decision, seconds per jump, rows fallen while thinking (at 100 ms per row),
+tokens in/out per decision, USD per 1,000 decisions and per jump, parse failures.
 
 ## Plan
 - `model/generative_baseline.py`: load `Qwen/Qwen3.5-0.8B` (instruct) with
