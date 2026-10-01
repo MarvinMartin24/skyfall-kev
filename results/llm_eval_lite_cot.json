@@ -1,0 +1,15 @@
+{
+ "model": "gemini-flash-lite-latest",
+ "thinking": "none",
+ "results": {
+  "cot": {
+   "n": 60,
+   "move_acc": 0.7,
+   "open_acc": 1.0,
+   "parsed": 1.0,
+   "errors": 0,
+   "latency_ms_p50": 895.6838539999985,
+   "served_by": "gemini-3.5-flash-lite"
+  }
+ }
+}

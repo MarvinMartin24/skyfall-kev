@@ -1,6 +1,7 @@
 data/*.jsonl
 runs/
 __pycache__/
+results/learning_curve.jsonl.bak
 *.pyc
 .DS_Store
 .venv/
