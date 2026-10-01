@@ -48,5 +48,10 @@ measured overlaps with scripts). Verdict: **ACCEPT**, with two findings we acted
 | 8 | nit | Eval slightly sparser than train (3.59 vs 3.68 obstacles per state) because dedupe pressure scales with split size. | Noted; not material. |
 | 9 | nit | `noul` questions carry no `criteria`; Kev's loader does not require it. PLAN wording tightened. | Fixed. |
 
-Consequence: data regenerated, and the baseline benchmark and fine-tune were
-restarted on the new files (about 10 minutes of training lost).
+Follow-up: the first regeneration had only 37 eval rows for the "low altitude,
+blocked below" case. Added a fourth bucket `low_blocked` with a 5% quota
+(1,000 train / 100 eval rows) so the clause is measurable. Final mix: 40% dodge,
+15% open, 5% low_blocked, 40% idle.
+
+Consequence: data regenerated (v3), and the baseline benchmark and fine-tune were
+restarted on the new files (about 12 minutes of training lost in total).

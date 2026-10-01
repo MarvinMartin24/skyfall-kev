@@ -23,16 +23,28 @@ def example(w, labels):
     return {"state": w.render(), "questions": qs}
 
 
-def collect(seed_start, n_target, eps=0.3, mix=(0.45, 0.15, 0.40), exclude=frozenset()):
+MIX = {"dodge": 0.40, "open": 0.15, "low_blocked": 0.05, "idle": 0.40}
+
+
+def bucket(text, lab):
+    low = int(text.split("\n", 1)[0].split(": ")[1]) <= OPEN_ALT
+    if low and not lab["open"]:
+        return "low_blocked"          # at or below 1000 m with something under you: do NOT open (sidestep)
+    if lab["move"] != "stay":
+        return "dodge"
+    return "open" if lab["open"] else "idle"
+
+
+def collect(seed_start, n_target, eps=0.3, mix=MIX, exclude=frozenset()):
     """Play oracle episodes with eps-random moves so we also see bad positions.
-    Labels always come from the oracle. Three buckets, mixed to fixed ratios:
-      dodge: move != stay        open: move == stay and open == True
-      idle:  everything else (stay, no open)
+    Labels always come from the oracle. Four buckets, mixed to fixed ratios (MIX):
+      dodge: move != stay (above 1000 m)      open: at/below 1000 m, clear below -> open
+      low_blocked: at/below 1000 m, blocked below -> sidestep, don't open    idle: stay, no open
     States whose key() is in `exclude` (the eval set's keys) are never emitted."""
     rng = random.Random(seed_start)
-    seen, buckets = set(), {"dodge": [], "open": [], "idle": []}
-    need = {k: int(n_target * f) for k, f in zip(buckets, mix)}
-    need["idle"] = n_target - need["dodge"] - need["open"]
+    seen, buckets = set(), {k: [] for k in mix}
+    need = {k: int(n_target * f) for k, f in mix.items()}
+    need["idle"] += n_target - sum(need.values())
     seed = seed_start
     while any(len(buckets[k]) < need[k] for k in buckets):
         w = World(seed=seed); seed += 1
@@ -41,13 +53,12 @@ def collect(seed_start, n_target, eps=0.3, mix=(0.45, 0.15, 0.40), exclude=froze
             text = w.render()
             if text not in seen and key(text) not in exclude:
                 seen.add(text)
-                k = "dodge" if lab["move"] != "stay" else ("open" if lab["open"] else "idle")
-                buckets[k].append(example(w, lab))
+                buckets[bucket(text, lab)].append(example(w, lab))
             a = dict(lab)
             if rng.random() < eps:
                 a["move"] = rng.choice(["left", "right", "stay"])
-            if a["open"] and rng.random() < 0.6:
-                a["open"] = False          # keep falling below 1000 m to collect more open states
+            if a["open"] and rng.random() < 0.75:
+                a["open"] = False          # keep falling below 1000 m to collect more low-altitude states
             elif not a["open"] and rng.random() < 0.02:
                 a["open"] = True
             w.step(a["move"], a["open"])
