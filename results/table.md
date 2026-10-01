@@ -6,7 +6,7 @@
 |---|---|---|---|---|---|
 | released Kev-0.8B, zero-shot | 0.554 | 0.467 | 0.626 | 0.506 | 0.00 (0/200) |
 | fine-tuned, step 2500 | 0.993 | 1.000 | 0.013 | 0.000 | 0.96 (50 jumps) |
-| oracle (the rule) | 1.000 | 1.000 | 0 | 0 | 0.95 (500 jumps) |
+| oracle (the rule) | 1.000 | 1.000 | 0 | 0 | 0.94 (500 jumps) |
 
 Zero-shot numbers: full `kev.benchmark` on 2,000 states. Fine-tuned: 300 states via `model/eval.py` (final: see `runs/ft-eval/report.json` if present).
 

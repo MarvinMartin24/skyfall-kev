@@ -22,7 +22,7 @@ A checkpoint that clears the bar: `move` accuracy >= 0.90, `open` >= 0.95 on
 
 ## Result (in progress; attempts 1–4 were restarted after data fixes and the clouds change, see steps/02-data.md)
 - Attempt 5 (final recipe) started 2026-09-30 23:50 with `--lora_snapshot_every 100`
-  (our 12-line patch to Kev, `patches/kev-lora-snapshots.diff`), so a loadable
+  (our 8-line patch to Kev, `patches/kev-lora-snapshots.diff`), so a loadable
   checkpoint exists every 100 steps for the learning montage and for playing
   early models. Kev itself only writes LoRA runs at the end.
 - Started 2026-09-30 23:04 on the M2 Max, `scripts/train_mac.sh`: 20,000 records,

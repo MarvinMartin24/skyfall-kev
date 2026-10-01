@@ -142,7 +142,7 @@ def main():
     with open(args.out + ".md", "w") as f:
         f.write(f"# The race: {args.episodes} seeded jumps per player (seeds {seeds[0]}–{seeds[-1]}" + (", with balloons" if args.surprise else "") + ")\n\n")
         f.write("Latency is per decision (both questions). `seconds_per_jump` is the time the skydiver spends in the air if the sky waits for each decision. "
-                f"`rows_fallen_while_thinking` assumes a row every {TICK_MS} ms. Kev tokens are priced at {'Jev list price ($0.042/M input, output free)' if args.kev_price == 'jev' else '$0 (local)'}; "
+                f"`rows_fallen_while_thinking` assumes a row every {TICK_MS} ms. Kev tokens are priced at {'Jev list price ($0.042/M input, output free, as cited in Simon Willison\'s Sep 2026 write-up)' if args.kev_price == 'jev' else '$0 (local)'}; "
                 "Gemini at its list price. Accuracy is agreement with the oracle on the states actually visited.\n\n")
         f.write(md_table(results))
     print("wrote", args.out + ".md")

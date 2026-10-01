@@ -16,7 +16,7 @@ Left: prompt → decode tokens → parse. Right: state + typed questions → one
 Live: `skyfall.py --policy oracle --fps 4`. "A state is 43 tokens."
 
 ### 5. The rule
-`game/oracle.py`, 15 lines. "The teacher. 95% of jumps. The model never sees the code."
+`game/oracle.py`, 15 lines. "The teacher. 94% of jumps. The model never sees the code."
 
 ### 6. The data
 One JSONL line; 20,000 / 2,000; mix 40% dodge, 15% open, 5% low-and-blocked, 40% idle.
@@ -35,12 +35,12 @@ One JSONL line; 20,000 / 2,000; mix 40% dodge, 15% open, 5% low-and-blocked, 40%
 kev.train --data train.jsonl --init_from jaredpalmer/kev-0.8b --base Qwen/Qwen3.5-0.8B-Base \
   --epochs 1 --lr 2e-5 --batch 4 --accum 2 --device mps --dtype fp32 --lora_snapshot_every 100
 ```
-5.8 h on an M2 Max (fp32, two kernels in fallback mode); ~20 min on an H100. 3.2 GB peak device memory. Checkpoint 62 MB.
-"Cross-entropy against the oracle's label. Imitation of a rule, not reinforcement learning."
+5.8 h on an M2 Max (fp32, two kernels in fallback mode); the Kev authors report ~20 min for a comparable run on an H100 (not measured here). 3.2 GB peak device memory. Checkpoint 62 MB.
+"Cross-entropy against the oracle's label. Kev's default augmentation on: options shuffled, a third of move questions get a none-or-distractor option. Imitation of a rule, not reinforcement learning."
 
 ### 10. Watching it learn
 `results/learning_curve.png` and `results/gifs/montage.gif`.
-Steps 100 / 300 / 700 / 1000 / 1300 / 2500: move 0.51 / 0.57 / 0.87 / 0.96 / 0.98 / 0.99; open 0.89 / 0.93 / 0.98 / 0.98 / 0.99 / 1.00; live wins 0 / 18% / 24% / 76% / 96% / 94%.
+Steps 100 / 300 / 700 / 1000 / 1300 / 2500: move 0.51 / 0.57 / 0.87 / 0.96 / 0.98 / 0.99; open 0.89 / 0.93 / 0.98 / 0.98 / 0.99 / 1.00; live wins on 50 seeds: – / 18% / 24% / 76% / 96% / 96% (and 94 of 100 on a second seed set).
 "Altitude in 100 steps. Nothing on the grid until warm-up ends at step 250. At 700 it dodges but picks the wrong side: 16 of 96 'right' cases answered 'left'. By 1,300, parity with the rule."
 
 ### 11. After

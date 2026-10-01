@@ -17,20 +17,24 @@ checkable and the base model cannot already do it.
 **How is this different from reading next-token logprobs for "A", "B", "C"?**
 Options are arbitrary spans with descriptions, each option's hidden state has
 read its own description, questions are isolated by a block-causal mask, the
-readout was trained for this, and there is a fitted temperature for
-calibration. Logprob-on-a-letter gets you none of that and is notoriously
-sensitive to the letter.
+readout was trained for this, and released checkpoints carry a fitted
+calibration temperature. Logprob-on-a-letter gets you none of that and is
+notoriously sensitive to the letter.
 
 **Why does one forward pass answer several questions?**
 The state is encoded once; each question is a branch that attends to the
-state and to itself only. Branches never see each other, so their answers are
-independent and can be computed in the same pass, or as rows on a cached
-state prefix when serving.
+state and to itself only, never to another question. On attention-only
+backbones that is one packed pass with a block-causal mask; on Qwen3.5, which
+is hybrid (recurrent DeltaNet layers), Kev runs each question as its own short
+row on the cached state. Same probabilities either way, and no tokens are
+generated.
 
 **What exactly is trained?**
 LoRA adapters (rank 16) on every linear layer of the frozen 0.8B backbone and
 the pointer head (two 1024 to 256 linear maps). We warm-start both from the
-released checkpoint ("delta mode"). Loss is cross-entropy per question.
+released checkpoint ("delta mode"). Loss is cross-entropy per question. Kev's
+default augmentation was on: option order shuffled, and about a third of the
+`move` questions got a "none of the above" or distractor option.
 
 **Did it learn the rule or memorise states?**
 Eval grids are excluded from training by construction and it makes 2 move
@@ -57,8 +61,9 @@ Brier score next to accuracy for that reason.
 **What is the difference between Jev and Kev?**
 Jev: TypeSafe's closed, hosted model, input-token pricing, stronger on
 knowledge-heavy questions. Kev: Apache-2.0 reimplementation of the published
-architecture on Qwen3.5 bases (0.8B to 27B), same `/v1/systemone` contract,
-so the official SDK works against it.
+architecture: LoRA adapters on Qwen3.5 bases at 0.8B, 4B and 9B, and a
+full-weight 27B on Qwen3.8; same `/v1/systemone` contract, so the official
+SDK works against it.
 
 **Why fp32 on the Mac?**
 `kev.train` only enables bf16 autocast on CUDA. On Metal we train in fp32; at

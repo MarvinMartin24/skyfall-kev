@@ -1,0 +1,8 @@
+Snapshot step-1300, 300 held-out states (console output recorded 2026-10-01 02:55, model/confusion.py)
+rows = oracle, cols = model
+            left  right   stay
+true  left:    52      0      2
+true right:     0     92      4
+true  stay:     1      0    149
+open errors: {'false_open': 2, 'missed_open': 2} | move errors: 7 of 300
+Symbol probe (one symbol directly below Y, mean P(stay) over the 5 columns): . 1.00, C 1.00, B 0.00, P 0.00, A 0.00, O 0.11, Z 0.00

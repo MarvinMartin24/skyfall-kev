@@ -19,7 +19,7 @@ def main():
            "| model | move acc | open acc | move Brier | open Brier | win rate |", "|---|---|---|---|---|---|",
            f"| released Kev-0.8B, zero-shot | {base['move_acc']:.3f} | {base['open_acc']:.3f} | {base['move_brier']:.3f} | {base['open_brier']:.3f} | 0.00 (0/200) |",
            f"| fine-tuned, step {final_lc['step']} | {final_lc['move_acc']:.3f} | {final_lc['open_acc']:.3f} | {final_lc['move_brier']:.3f} | {final_lc['open_brier']:.3f} | {final_wr['win_rate_50']:.2f} (50 jumps) |",
-           "| oracle (the rule) | 1.000 | 1.000 | 0 | 0 | 0.95 (500 jumps) |", "",
+           "| oracle (the rule) | 1.000 | 1.000 | 0 | 0 | 0.94 (500 jumps) |", "",
            "Zero-shot numbers: full `kev.benchmark` on 2,000 states. Fine-tuned: 300 states via `model/eval.py` (final: see `runs/ft-eval/report.json` if present).", "",
            "## Learning curve", "", "| step | records | move acc | open acc | move Brier | win rate (50 jumps) |", "|---|---|---|---|---|---|"]
     wr_by = {r["step"]: r for r in wr}

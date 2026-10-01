@@ -1,0 +1,8 @@
+Snapshot step-700, 300 held-out states (console output recorded 2026-10-01 01:30, model/confusion.py)
+rows = oracle, cols = model
+            left  right   stay
+true  left:    54      0      0
+true right:    16     76      4
+true  stay:    11      7    132
+open errors: {'false_open': 3, 'missed_open': 3}
+50 live jumps (seeds 8000-8049): win_rate 0.24, outcomes {'hit_A': 15, 'hit_B': 14, 'safe_landing': 12, 'hit_P': 9}

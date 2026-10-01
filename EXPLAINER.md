@@ -34,7 +34,7 @@ Kev packs one request into a single token sequence:
 ```
 <state> altitude: 1200 ⏎ . . . B . ⏎ B . . . Y ⏎ ...          ← the state, once
 <q> Which way should you move... <opt> left: move one column... </opt> <opt> right: ... </opt> <opt> stay: ... </opt> <decide>
-<q> Should the skydiver open... <opt> true </opt> <opt> false </opt> <decide>
+<q> Should the skydiver open... <opt> no </opt> <opt> yes </opt> <decide>
 ```
 
 The delimiters `<state> <q> <opt> </opt> <decide>` are five rarely used Qwen
@@ -45,7 +45,16 @@ tokens, which makes option boundaries unforgeable.
 Attention is **block-causal**: state tokens attend causally among themselves;
 each question's branch attends to the state and to its own earlier tokens, and
 **never to another question's branch**. Branch position ids restart right
-after the state. Two consequences:
+after the state.
+
+One honest detail about *our* backbone. That packed, single-sequence form is
+what Kev uses on attention-only models. Qwen3.5 is a hybrid: most of its
+layers are Gated DeltaNet, which is recurrent and cannot honour a block-causal
+mask. So on Qwen3.5 Kev encodes the state once and runs **each question as its
+own causal row continuing from the state's cache**. Kev tests that the two
+forms give the same probabilities to fp32 noise, so everything below holds
+either way, and there is still no token generation: one pass over the state
+plus one short pass per question. Two consequences:
 
 - Questions in one call are independent by construction. Asking ten
   questions does not change the answer to any one of them.
@@ -65,7 +74,11 @@ After the backbone, Kev reads two kinds of hidden vectors per question:
   state, the instructions and every option. Think of it as "the question,
   having read everything".
 - `h_opt[k]`: the hidden state at the `</opt>` token closing option *k*. It
-  has attended to the state, the instructions and option *k*'s text.
+  has attended to the state, the instructions, option *k*'s text, and, in the
+  default configuration we used, the options listed before it. (Kev has an
+  `option_isolation` mode that removes that last dependency; it needs the
+  packed mask and is not available on hybrid backbones. This is where the
+  option-order sensitivity in §9 comes from.)
 
 The head is two linear maps into a 256-dim space and a dot product:
 
@@ -81,7 +94,7 @@ class PointerHead(nn.Module):
 Softmax over the K logits is the answer. It is literally one attention
 query ("the decision") over K keys ("the options"), which is why it is called
 a *pointer*: the model points at an option. A `noul` question is a 2-option
-pointer over "true"/"false"; a `score` is a pointer over the ordered levels.
+pointer over the options "no" and "yes" (in that order); a `score` is a pointer over the ordered levels.
 
 Why this beats a classifier head: a linear classifier has a fixed label set
 baked into its weights. The pointer head scores **whatever option text you
@@ -102,9 +115,19 @@ Kev fine-tunes with **LoRA** (rank 16, alpha 32, dropout 0.05, on every linear
 layer of the backbone) plus the pointer head. The 0.8B backbone's original
 weights are frozen. We use Kev's "delta mode": `--init_from jaredpalmer/kev-0.8b`
 warm-starts the LoRA and head from the released checkpoint rather than from
-zero. The repo reports that this matters a lot (0.33 vs 0.84 held-out accuracy
-in their test), and it means we are *adding* Skyfall to a model that already
+zero. The repo reports one user's test where training from scratch scored 0.33 on
+Kev's own evaluation set against 0.84 when warm-started, with 0.88 on that
+user's new domain. It means we are *adding* Skyfall to a model that already
 knows how to be a decision model, not teaching the readout from scratch.
+
+Kev's trainer also augments every `choice` question by default, and we left
+the defaults on: option order is shuffled on every record; with probability
+0.10 the true option is removed and a "none of the above" option becomes the
+answer; with 0.12 a "none" option is added as a wrong alternative; with 0.15
+an irrelevant distractor option is added. So about a third of the `move`
+questions the model trained on had four options, not three. That is Kev's
+built-in defence against learning option positions, and it is also why the
+model is comfortable with option sets it did not see at training time.
 
 What the LoRA has to learn for Skyfall, concretely:
 
@@ -112,7 +135,7 @@ What the LoRA has to learn for Skyfall, concretely:
    sequence (the grid is one token per cell, so "column" is a position
    pattern, not a number the model is told).
 2. Read the cell directly under `Y` in the next row.
-3. If it is not `.`, compare the two neighbouring columns at rows 1 and 2.
+3. If it is neither `.` nor `C`, compare the two neighbouring columns at rows 1 and 2.
 4. For `open`: compare the altitude number to 1000 **and** check that the
    cell directly below is empty. Both conditions matter: 5% of the data is
    "low altitude but something is under you", where the right answer is to
@@ -175,10 +198,10 @@ in `results/table.md`.
 
 Training data contains obstacles `B`, `P`, `A`. At demo time we add `O`, a
 hot-air balloon, which the model has never seen. The oracle does not care
-(anything that is not `.` is a wall) and keeps winning 93%.
+(anything that is not `.` or `C` is a wall) and keeps winning 94%.
 
-- If the fine-tuned model keeps dodging `O`, it learned "non-empty cell below
-  means move", a rule over the grid, not a lookup over three letters.
+- If the fine-tuned model keeps dodging `O`, it learned "any letter except C
+  below means move", a rule over the grid, not a lookup over three letters.
 - If it flies into balloons, it learned the letters. That is also a real
   result: it tells you the LoRA latched onto token identity, and the fix is
   obvious (more obstacle symbols in training).
@@ -192,12 +215,15 @@ the one that looks like a hole.
 
 ## 8. Why it is fast (the closing slide)
 
-For our two questions, one Kev decision is: encode 43 state tokens plus two
-short branches, one forward pass, two softmaxes. A generative model answering
+For our two questions, one Kev decision is: encode 43 state tokens, run two
+short question rows on that cache, two softmaxes. Measured: 56 ms median per
+decision on the M2 Max through Kev's MLX server. A generative model answering
 the same thing must run a forward pass per generated token (a 20-token JSON
-answer is 20 passes plus the prompt) and then parse. `results/latency.md`
-measures both on the same machine and the same states. The architectural
-reason is in section 2: there is no decoding loop to run.
+answer is 20 passes plus the prompt) and then parse: 745 ms for the smallest
+Gemini with a bare prompt, about 900 ms with a visible chain of thought, 27 s
+for the flagship with thinking on. `results/table.md` and `results/race-*.md`
+have the measurements. The architectural reason is in section 2: there is no
+decoding loop to run.
 
 ## 9. Limits, said plainly
 
@@ -213,6 +239,9 @@ reason is in section 2: there is no decoding loop to run.
   mode. We use neither, for simplicity.
 - On a Mac, Kev trains in fp32 (`--dtype bf16` is CUDA-only in `kev.train`),
   which is slower than the Colab path but fine at 0.8B.
+- Our checkpoint is uncalibrated (temperature 1.0); released Kev checkpoints
+  are calibrated. The before/after Brier rows compare a calibrated released
+  model with raw logits from ours; the gap is far too large for that to matter.
 
 ## 10. Glossary
 

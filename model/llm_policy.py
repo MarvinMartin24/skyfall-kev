@@ -93,7 +93,7 @@ PRICES = {                            # list prices found 2026-09-30; check ai.g
     "gemini-3.5-flash": (1.50, 9.00),
     "gemini-3.1-flash-lite": (0.25, 1.50),
     "gemini-flash-lite-latest": (0.25, 1.50),   # alias; the response's modelVersion says what actually served it
-    "jev": (0.042, 0.0),              # TypeSafe's published Jev price: input only, output free
+    "jev": (0.042, 0.0),              # Jev price as cited by Simon Willison (simonwillison.net, Sep 2026): input only, output free
 }
 
 

@@ -37,7 +37,7 @@ Final rules took three iterations:
    not "non-empty means wall". The balloon `O`, never in training, became the
    test of whether it applies the sentence "any other letter is deadly".
 
-A 15-line oracle plays this at 95% and labels every state. No gameplay was
+A 15-line oracle plays this at 94% and labels every state. No gameplay was
 ever recorded; `data/generate.py` makes 20,000 labelled states in 3 seconds.
 
 ## 3. Two code reviews that earned their keep
@@ -75,15 +75,19 @@ loses every jump. Condition (a) holds.
 - Apple M2 Max, 64 GB. Training runs on the GPU through PyTorch's Metal
   backend (`device=mps`). Serving uses MLX in bfloat16. Two Qwen3.5 kernels
   only have CUDA builds, so on the Mac they fall back to plain PyTorch: about
-  0.75 to 1.1 s per record, versus the 20-minute epoch the Kev authors get on
-  an H100.
+  0.75 to 1.1 s per record. The Kev authors report about 20 minutes for a
+  comparably sized run on an H100; we did not measure that.
+- Kev's default augmentation stayed on: option order shuffled every time,
+  and about a third of the `move` questions got a "none of the above" or a
+  distractor option. The model trained on four-option questions it is never
+  asked at demo time.
 - LoRA rank 16 on every linear layer plus the pointer head: 11.3M trainable
   parameters out of about 800M, warm-started from the released checkpoint
   ("delta mode"). fp32, because Kev enables bf16 autocast on CUDA only.
 - The run was restarted four times in the first hour, each time for a good
   reason (leak fix, rule change, clouds, snapshots). Early restarts are cheap;
   the lesson is to have the reviews *before* the long run.
-- Kev only writes LoRA checkpoints at the end, so we added a 12-line patch
+- Kev only writes LoRA checkpoints at the end, so we added an 8-line patch
   (`patches/kev-lora-snapshots.diff`) that saves a loadable checkpoint every
   100 steps. Everything below depends on it.
 
@@ -126,11 +130,13 @@ two snapshots later.
 
 Win rates on live jumps (50 seeded jumps per snapshot): released Kev 0/200,
 step 300: 18%, step 500: 42%, step 600: 38%, step 700: 24%, step 800: 58%,
-step 900: 74%, step 1000: 76%, **step 1300: 96%**, oracle 95% (the oracle has
-no lookahead; the model imitates it, so parity is the ceiling).
+step 900: 74%, step 1000: 76%, **step 1300: 96%**, final: 96%; the oracle
+scores 94% on these layouts (it has no lookahead; the model imitates it, so
+parity is the ceiling). All 50-jump numbers use seeds 8000–8049; the 100-jump
+numbers in §10 use seeds 9000–9099.
 
 The dip at step 700 while held-out accuracy kept rising is instructive. The
-confusion matrix on 300 states says why: every "left" case is right, but in
+confusion matrix on 300 states (`results/step700-confusion.txt`) says why: every "left" case is right, but in
 16 of 96 "right" cases the model picks **left**, and in 18 of 150 "stay" cases
 it dodges for no reason. All 38 deaths in those 50 jumps were collisions,
 none were parachute mistakes. So the model has learned "something is below
@@ -153,7 +159,7 @@ thinking):
 
 | player | wins | move agreement | latency p50 | seconds per jump | $ per 1,000 decisions |
 |---|---|---|---|---|---|
-| released Kev (local) | 0/10 | 0.80 | 280 ms | 0.3 | 0.0075 at Jev list price |
+| released Kev (local) | 0/10 | 0.80 (8 of its 10 first-tick moves) | 280 ms | 0.3 | 0.0075 at Jev's list price as cited by Simon Willison |
 | Gemini flash-lite | 0/10 | 0.37 | 745 ms | 3.1 | 0.07 |
 
 Two different failures: Kev opened too high every time; Gemini never opened
@@ -171,8 +177,9 @@ it on the grid in one shot (always-stay would score 0.55). Letting it write a
 one-sentence analysis before the answer (visible chain of thought, ~70 output
 tokens) changed everything: **move 0.70, open 1.00, at 896 ms per decision**.
 "Minimal" thinking on the 3.1 lite model did nothing (0.37). The flagship
-3.8-flash with thinking took 27 s per decision in probing, which at one row
-per 100 ms is 270 rows of free fall. Larger variants are being measured.
+3.8-flash with thinking "low" took 27 s per decision in a two-call probe
+(`results/gemini-probes.md`), which at one row per 100 ms is 270 rows of free
+fall. The larger variants were not measured further: Gemini was paused.
 
 The free tier also matters for the story: 44% of lite decisions needed a
 retry, so the wall time per decision was 2.5 s.
@@ -191,7 +198,8 @@ retry, so the wall time per decision was 2.5 s.
 
 Three quarters of an hour after the plateau broke, the snapshot at step 1,300
 lands 48 of 50 jumps. On 300 held-out states it makes 7 move errors and 4
-open errors, and the wrong-side dodges are gone (zero left/right confusions).
+open errors, and the wrong-side dodges are gone (zero left/right confusions,
+`results/step1300-confusion.txt`).
 The success bar from `PLAN.md` (move >= 0.90, open >= 0.95, win rate >= 0.60)
 is cleared with 1,200 steps of training still to go.
 
@@ -220,7 +228,8 @@ head and a tokenizer.
 |---|---|---|---|
 | move accuracy, held-out | 0.55 | 0.993 (2 errors in 300) | 1 |
 | open accuracy, held-out | 0.47 | 1.000 | 1 |
-| live jumps won, 100 seeds | 0 | 94 | 97 |
+| live jumps won, 100 seeds (9000–9099) | 0 | 94 | 97 |
+| live jumps won, 50 seeds (8000–8049, the curve's seeds) | 0 | 48 | 47 |
 | same seeds with balloons | 0 | 83 | 97 |
 
 The two remaining move errors are both at exactly 1,000 m with something

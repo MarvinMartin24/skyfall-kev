@@ -20,7 +20,7 @@ cd ../kev && git apply "$SKY/patches/kev-lora-snapshots.diff"   # adds --lora_sn
 uv sync --extra serve && export KEV="$PWD" && cd "$SKY"
 ```
 
-The patch is 12 lines: it reuses Kev's own final-save code (adapter, `head.pt`,
+The patch adds 8 lines: it reuses Kev's own final-save code (adapter, `head.pt`,
 tokenizer) every N optimizer steps into `runs/<run>-snapshots/step-<N>/`, each
 of which `kev.serve` and `kev.benchmark` load like any run. We use it for the
 "model at step 100 / 500 / 2500" montage in the demo.
@@ -88,7 +88,8 @@ which runs
 
 ```bash
 cd "$KEV" && uv run python -m kev.train \
-  --data "$SKY/data/train.jsonl" --init_from jaredpalmer/kev-0.8b --base Qwen/Qwen3.5-0.8B-Base \
+  --data "$SKY/data/train.jsonl" --init_from jaredpalmer/kev-0.8b \
+  --base Qwen/Qwen3.5-0.8B-Base --base_revision dc7cdfe2ee4154fa7e30f5b51ca41bfa40174e68 \
   --epochs 1 --lr 2e-5 --batch 4 --accum 2 --device mps --dtype fp32 \
   --lora_snapshot_every 100 --out "$SKY/runs/skyfall-0.8b"
 ```
@@ -101,7 +102,7 @@ cd "$SKY" && python3 skyfall.py --policy model --url http://127.0.0.1:8010 --fps
 ```
 
 `--dtype bf16` is CUDA-only in `kev.train`; see `colab/train.sh` for the GPU form.
-Runtime on M2 Max: see `results/train.md`.
+Runtime on M2 Max: 5.8 h; details in `results/training_metrics.json` and `steps/04-train.md`.
 
 ## 5. Evaluate the fine-tune
 

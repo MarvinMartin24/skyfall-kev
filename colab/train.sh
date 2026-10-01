@@ -4,7 +4,7 @@
 # 0. GPU check: must print True, otherwise change the runtime (T4 has no bf16)
 python -c "import torch; print(torch.cuda.is_bf16_supported(), torch.cuda.get_device_name())"
 
-# 1. Install Kev (+ our 12-line patch for periodic LoRA snapshots)
+# 1. Install Kev (+ our 8-line patch for periodic LoRA snapshots)
 pip install -q uv
 git clone https://github.com/jaredpalmer/kev.git
 cd kev && git apply /content/drive/MyDrive/skyfall/patches/kev-lora-snapshots.diff && uv sync --extra serve
