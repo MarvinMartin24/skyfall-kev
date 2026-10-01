@@ -23,7 +23,7 @@ tokens in/out per decision, USD per 1,000 decisions and per jump, parse failures
 - Time 100 Kev decisions through `kev.serve` (reuse `model/eval.py`).
 
 ## Acceptance
-- `results/latency.md` with mean and p95 for both, same hardware, same states.
+- `results/latency.md` with mean and p95 for both, same hardware, same states. _(superseded: the numbers live in `results/table.md` and `results/race-*.md`, see Result below)_
 - Note any caveat (serving overhead, batch size 1, warm-up excluded).
 
 

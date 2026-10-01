@@ -105,9 +105,12 @@ possible without retraining.
 
 Why this beats next-token logprobs on "A/B/C": options are arbitrary spans
 with descriptions, not single tokens; each option's representation has read
-its own description; the objective was trained for this readout; and there is
-a calibration temperature fitted on held-out data (`head.pt["temperature"]`)
-that divides logits at inference without changing the argmax.
+its own description; the objective was trained for this readout; and released Kev checkpoints
+carry a calibration temperature fitted on held-out rows (`head.pt["temperature"]`,
+2.35 for the released 0.8B) that divides logits at inference without changing
+the argmax. Our fine-tune never ran Kev's `scripts/calibrate_checkpoint.py`, so it
+serves raw logits (temperature 1.0); its expected calibration error on the
+held-out set is 0.002 regardless.
 
 ## 4. What fine-tuning changes
 
