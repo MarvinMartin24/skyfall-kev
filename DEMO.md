@@ -17,7 +17,8 @@ Before the talk: Kev server running on the **fine-tuned** checkpoint on port
 
 ## If something breaks
 
-- Server down: `results/clips/` has the base and fine-tuned runs recorded.
+- Server down: `results/gifs/` has every player recorded on the same seeds
+  (`scripts/record_gif.py`, headless; frame timing = real decision latency).
 - Numbers questioned: every row in `results/table.md` names its command.
 
 ## The table (filled from results/)
