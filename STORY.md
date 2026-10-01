@@ -100,6 +100,8 @@ jump can be watched with a progressively better brain.
 | 300 | 2,400 | 0.93 | 0.57 (Brier 0.53, first real movement) |
 | 400 | 3,200 | 0.94 | 0.69 (Brier 0.37) |
 | 500 | 4,000 | 0.94 | 0.77 (Brier 0.28) |
+| 600 | 4,800 | 0.95 | 0.86 (Brier 0.21) |
+| 700 | 5,600 | 0.98 | 0.87 (Brier 0.21) |
 
 The model learned the altitude rule almost immediately and, for the first
 250 steps, did not read the grid at all. It always says "stay" and flies into the first obstacle.
@@ -118,8 +120,19 @@ broke through on its own once warm-up ended (0.57 at step 300, 0.69 at step
 warm-up is not a reason to touch the learning rate; look at the curve one or
 two snapshots later.
 
-Win rates on live jumps at this stage: released Kev 0/200 (opens on tick 1),
-step-300 snapshot 9/50, oracle 95%.
+Win rates on live jumps (50 seeded jumps per snapshot): released Kev 0/200,
+step 300: 18%, step 500: 42%, step 600: 38%, step 700: 24%, oracle 95%.
+
+The dip at step 700 while held-out accuracy kept rising is instructive. The
+confusion matrix on 300 states says why: every "left" case is right, but in
+16 of 96 "right" cases the model picks **left**, and in 18 of 150 "stay" cases
+it dodges for no reason. All 38 deaths in those 50 jumps were collisions,
+none were parachute mistakes. So the model has learned "something is below
+me, move" before it has learned *which way*. The oracle's side choice depends
+on the neighbouring columns and on the tie-break toward the centre, which
+needs the column index, a harder positional fact than "the cell under Y".
+A jump needs about 20 consecutive correct decisions, so a few wrong-side
+dodges cost more wins than the accuracy number suggests.
 
 ## 7. The race against an LLM
 
