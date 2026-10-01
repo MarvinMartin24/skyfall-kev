@@ -1,17 +1,36 @@
-"""Run episodes with a policy. Usage: python -m game.play --policy oracle --episodes 5 --show"""
+"""Run episodes with a policy.
+
+  python -m game.play --policy oracle --episodes 5 --show     # watch the rule play
+  python -m game.play --policy human                          # play yourself: a = left, d = right, enter = stay, add o to open
+  python -m game.play --policy model --url http://127.0.0.1:8009 --episodes 200 [--surprise]
+"""
 import argparse
 import random
 
-from game.sim import World, OBSTACLES, MOVES
+from game.sim import World, MOVES
 from game.oracle import oracle
 
 
-def random_policy(rng):
+def random_policy(seed):
+    rng = random.Random(seed)
     return lambda w: {"move": rng.choice(MOVES), "open": rng.random() < 0.1}
 
 
-def run_episode(policy, seed, obstacles=OBSTACLES, show=False):
-    w = World(seed=seed, obstacles=obstacles)
+def human_policy(seed):
+    def policy(w):
+        while True:
+            s = input("move [a=left  d=right  enter=stay]  add o to open the parachute > ").strip().lower()
+            if s in ("", "a", "d", "s", "o", "ao", "do", "so", "oa", "od", "os"):
+                move = "left" if "a" in s else "right" if "d" in s else "stay"
+                return {"move": move, "open": "o" in s}
+            print("keys: a, d, enter, o   (e.g. 'ao' = move left and open)")
+    return policy
+
+
+def run_episode(make_policy, seed, surprise=False, show=False):
+    """make_policy(seed) -> policy(world) -> {"move", "open"}; a fresh policy per episode keeps episodes reproducible."""
+    policy = make_policy(seed)
+    w = World(seed=seed, surprise=surprise)
     while not w.done:
         a = policy(w)
         if show:
@@ -26,26 +45,32 @@ def run_episode(policy, seed, obstacles=OBSTACLES, show=False):
 
 def main():
     p = argparse.ArgumentParser()
-    p.add_argument("--policy", choices=["oracle", "random", "model"], default="oracle")
-    p.add_argument("--episodes", type=int, default=200)
+    p.add_argument("--policy", choices=["oracle", "random", "model", "human"], default="oracle")
+    p.add_argument("--episodes", type=int, default=None, help="default 200, or 1 for --policy human")
     p.add_argument("--seed", type=int, default=1000)
     p.add_argument("--surprise", action="store_true", help="add an obstacle type never seen in training")
     p.add_argument("--show", action="store_true")
     p.add_argument("--url", default="http://127.0.0.1:8009")
     args = p.parse_args()
 
-    if args.policy == "oracle":
-        policy = oracle
+    if args.episodes is None:
+        args.episodes = 1 if args.policy == "human" else 200
+    if args.policy == "human":
+        args.show = True
+        make_policy = human_policy
+        print("You are Y. Obstacles scroll UP one row per tick. Open (o) only at or below 1000 m with an empty cell below you.\n")
+    elif args.policy == "oracle":
+        make_policy = lambda seed: oracle
     elif args.policy == "random":
-        policy = random_policy(random.Random(args.seed))
+        make_policy = random_policy
     else:
         from model.client import model_policy
-        policy = model_policy(args.url)
+        shared = model_policy(args.url, show=args.show)
+        make_policy = lambda seed: shared
 
-    obstacles = OBSTACLES + ("O",) if args.surprise else OBSTACLES
     wins, ticks, reasons = 0, 0, {}
     for i in range(args.episodes):
-        (result, reason), t = run_episode(policy, args.seed + i, obstacles, args.show)
+        (result, reason), t = run_episode(make_policy, args.seed + i, args.surprise, args.show)
         wins += result == "win"
         ticks += t
         reasons[reason] = reasons.get(reason, 0) + 1

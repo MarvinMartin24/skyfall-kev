@@ -6,10 +6,10 @@ fails acceptance, the step is redone and the file says so.
 
 | # | Step | Status |
 |---|---|---|
-| 01 | [Game and oracle](01-game.md) | built, pending review |
-| 02 | [Dataset and schema check](02-data.md) | built, pending schema check |
-| 03 | [Zero-shot baseline](03-baseline.md) | todo |
-| 04 | [Fine-tune](04-train.md) | todo |
+| 01 | [Game and oracle](01-game.md) | **done**, reviewed (accept), fixes applied |
+| 02 | [Dataset and schema check](02-data.md) | **done**, loads in Kev, review pending |
+| 03 | [Zero-shot baseline](03-baseline.md) | running |
+| 04 | [Fine-tune](04-train.md) | running (M2 Max, mps) |
 | 05 | [Evaluate, play, surprise obstacle](05-evaluate.md) | todo |
 | 06 | [Latency: decision model vs generation](06-latency.md) | todo |
 | 07 | [Docs: reproduce, demo, explain](07-docs.md) | todo |

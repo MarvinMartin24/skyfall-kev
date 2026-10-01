@@ -53,9 +53,11 @@ A . . . .
 3. Open only at or below 1000 m, and only when the cell below is empty.
 
 Measured: oracle wins 95% of 500 seeded jumps, random policy wins 0.2%.
-With the surprise balloon the oracle still wins 93%, because it treats any
-non-empty cell as an obstacle. The question for the demo is whether the
-fine-tuned model does too.
+With the surprise balloon, on identical layouts, the oracle still wins 95%,
+because it treats any non-empty cell as an obstacle. The question for the demo
+is whether the fine-tuned model does too. (The oracle has no lookahead; a
+player that looked further ahead could reach about 97%. 95% is the rule's
+ceiling, and the rule is what the model imitates.)
 
 **Two questions per state** (`data/questions.py`):
 - `move`: choice over `left`, `right`, `stay`.
@@ -89,7 +91,7 @@ Two rows, same eval file and same 200 seeded jumps:
 |---|---|---|---|---|---|
 | Kev-0.8B released, zero-shot | | | | | |
 | Kev-0.8B fine-tuned on Skyfall | | | | | |
-| Oracle (ceiling) | 1.00 | 1.00 | 0 | 0.95 | 0.93 |
+| Oracle (the rule) | 1.00 | 1.00 | 0 | 0.95 | 0.95 |
 
 Success bar before the demo: fine-tuned `move` >= 90%, `open` >= 95%, win
 rate >= 60%. If base Kev already wins more than 20% of jumps, raise spawn
