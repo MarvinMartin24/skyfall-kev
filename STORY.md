@@ -97,9 +97,10 @@ jump can be watched with a progressively better brain.
 | 0 (released) | 0 | 0.47 | 0.55 (= always stay) |
 | 100 | 800 | 0.89 | 0.51 |
 | 200 | 1,600 | 0.93 | 0.50 |
+| 300 | 2,400 | 0.93 | 0.57 (Brier 0.53, first real movement) |
 
-The model learned the altitude rule almost immediately and has not started
-reading the grid. It always says "stay" and flies into the first obstacle.
+The model learned the altitude rule almost immediately and, for the first
+250 steps, did not read the grid at all. It always says "stay" and flies into the first obstacle.
 That is what Marvin noticed watching it. Why it is plausible: the altitude is
 a number the backbone already knows how to read; "the cell six tokens after
 Y" is a positional pattern the adapters have to invent. Also, Kev's schedule
@@ -139,10 +140,12 @@ thin? We wrote three richer prompts and scored them on 60 held-out states:
 | rules + step-by-step procedure | 0.45 | 0.92 |
 
 Even with the procedure spelled out, a no-thinking lite model cannot execute
-it on the grid in one shot (always-stay would score 0.55). A chain-of-thought
-field in the answer and the thinking modes of the larger Gemini variants are
-being measured now; the big flagship with thinking took 27 s per decision in
-probing, which at one row per 100 ms is 270 rows of free fall.
+it on the grid in one shot (always-stay would score 0.55). Letting it write a
+one-sentence analysis before the answer (visible chain of thought, ~70 output
+tokens) changed everything: **move 0.70, open 1.00, at 896 ms per decision**.
+"Minimal" thinking on the 3.1 lite model did nothing (0.37). The flagship
+3.8-flash with thinking took 27 s per decision in probing, which at one row
+per 100 ms is 270 rows of free fall. Larger variants are being measured.
 
 The free tier also matters for the story: 44% of lite decisions needed a
 retry, so the wall time per decision was 2.5 s.
