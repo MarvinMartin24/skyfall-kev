@@ -11,3 +11,11 @@ wandb/
 .env
 !results/learning_curve.jsonl
 !results/winrate_curve.jsonl
+
+# rendered videos, manim cache and the video venv (large; rebuild with video/render.sh)
+video/out/
+.venv-video/
+media/
+*.mp4
+*.mov
+*.webm

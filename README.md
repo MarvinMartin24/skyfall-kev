@@ -23,6 +23,15 @@ python3 -m game.play --policy oracle --episodes 500 --surprise   # adds obstacle
 python3 -m data.generate --train 20000 --eval 2000        # writes data/train.jsonl, data/eval.jsonl
 ```
 
+Compare against hosted models (keys go in a gitignored `.env`, see `.env.example`; never in chat):
+
+```bash
+python3 scripts/jev_test.py smoke                       # 3 calls, prints the response shape and estimated spend
+python3 scripts/jev_test.py eval --n 2000 --max_usd 1   # accuracy / Brier / ECE of hosted Jev on data/eval.jsonl
+python3 scripts/jev_test.py race --episodes 20          # live jumps, seeds 6000-6019
+python3 -m model.bench --players oracle,gemini:gemini-flash-lite-latest --gemini_prompt cot --episodes 20 --seed 6000 --out results/race-gemini-cot
+```
+
 Layout: `game/sim.py` world, `game/oracle.py` the rule, `game/play.py` episodes,
 `data/questions.py` the two typed questions, `data/generate.py` the dataset,
-`model/` client + eval (Day 4).
+`model/` client + eval, `scripts/jev_test.py` hosted-Jev eval and race (stops at a spend cap, aborts on repeated API errors).

@@ -46,6 +46,21 @@ def main():
                 "| model | mean ms | move acc | open acc |", "|---|---|---|---|"]
         out += [f"| {k} | {v['mean_latency_ms']:.0f} | {v['move_acc']:.3f} | {v['open_acc']:.3f} |" for k, v in lat.items()]
         out += ["", "Gemini numbers (free tier, bare and chain-of-thought prompts) are in the race files below and in STORY.md §7.", ""]
+    if os.path.exists(R("jev-eval-2000.json")):
+        j = json.load(open(R("jev-eval-2000.json")))
+        out += [f"## Jev (hosted, {', '.join(j['served_by'])}), zero-shot, same {j['n_states']:,} held-out states", "",
+                "| | move | open | overall |", "|---|---|---|---|",
+                f"| accuracy | {j['move_acc']:.4f} | {j['open_acc']:.4f} | |",
+                f"| Brier | {j['move_brier']:.4f} | {j['open_brier']:.4f} | {j['overall_brier']:.4f} |",
+                f"| ECE | | | {j['ece']:.4f} |", "",
+                f"Latency per decision: median {j['latency_ms_median']:.0f} ms, p95 {j['latency_ms_p95']:.0f} ms (remote API, network included). "
+                f"Input tokens per request: {j['input_tokens'] / j['n_states']:.0f} (Jev's tokenizer). Run by `scripts/jev_test.py eval`; "
+                f"estimated spend ${j['est_usd']:.3f}.", ""]
+    if os.path.exists(R("jev-race-6000.json")):
+        j = json.load(open(R("jev-race-6000.json")))
+        out += [f"## Jev live race ({j['episodes']} jumps, seeds {j['seeds']})", "",
+                "| wins | win rate | decisions | move agreement | open agreement | latency p50 / p95 ms |", "|---|---|---|---|---|---|",
+                f"| {j['wins']} / {j['episodes']} | {j['win_rate']:.2f} | {j['decisions']} | {j['move_agreement']:.2f} | {j['open_agreement']:.2f} | {j['latency_ms_median']:.0f} / {j['latency_ms_p95']:.0f} |", ""]
     for path in sorted(glob.glob(R("race-*.md"))):
         out += [f"## {os.path.basename(path)}", "", open(path).read().split("\n", 2)[2], ""]
     if os.path.exists(R("llm_prompt_eval.json")):

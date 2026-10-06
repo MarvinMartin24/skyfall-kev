@@ -1,0 +1,39 @@
+{
+ "n_states": 2000,
+ "served_by": [
+  "jev-1.13.0"
+ ],
+ "move_acc": 0.343,
+ "open_acc": 0.9485,
+ "move_brier": 0.66349765,
+ "open_brier": 0.04224065000000019,
+ "overall_brier": 0.35286915000000013,
+ "ece": 0.06212499999999997,
+ "latency_ms_median": 175.7249999936903,
+ "latency_ms_p95": 231.02116699737962,
+ "move_confusion_gold_by_pred": {
+  "left": {
+   "left": 154,
+   "right": 168,
+   "stay": 11
+  },
+  "right": {
+   "left": 123,
+   "right": 416,
+   "stay": 20
+  },
+  "stay": {
+   "left": 354,
+   "right": 638,
+   "stay": 116
+  }
+ },
+ "open_confusion": {
+  "tp": 291,
+  "fp": 94,
+  "fn": 9,
+  "tn": 1606
+ },
+ "est_usd": 0.03979512600000001,
+ "input_tokens": 947503
+}

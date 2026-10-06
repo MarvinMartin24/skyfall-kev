@@ -1,0 +1,351 @@
+{
+ "args": {
+  "players": "oracle,gemini:gemini-flash-lite-latest",
+  "episodes": 20,
+  "seed": 6000,
+  "surprise": false,
+  "kev_price": "jev",
+  "price_in": null,
+  "price_out": null,
+  "gemini_thinking": "none",
+  "gemini_prompt": "cot",
+  "out": "results/race-gemini-cot"
+ },
+ "tick_ms": 100,
+ "results": [
+  {
+   "player": "oracle",
+   "model_version": null,
+   "decisions": 423,
+   "jumps": 20,
+   "win_rate": 1.0,
+   "move_acc": 1.0,
+   "open_acc": 1.0,
+   "parsed_rate": 1.0,
+   "retries_per_decision": 0.0,
+   "wall_ms_mean": 0.0001945673286073773,
+   "latency_ms_mean": 0.0001945673286073773,
+   "latency_ms_p50": 0.000166997779160738,
+   "latency_ms_p95": 0.000333995558321476,
+   "seconds_per_jump": 4.11509900004603e-06,
+   "rows_fallen_while_thinking": 1.945673286073773e-06,
+   "tokens_in_per_decision": 0,
+   "tokens_out_per_decision": 0,
+   "usd_per_1000_decisions": 0.0,
+   "usd_per_jump": 0.0,
+   "price_per_mtok": {
+    "in": 0.0,
+    "out": 0.0
+   },
+   "jumps_detail": [
+    {
+     "seed": 6000,
+     "result": "win",
+     "reason": "safe_landing",
+     "ticks": 21,
+     "air_s": 6.372967618517578e-06
+    },
+    {
+     "seed": 6001,
+     "result": "win",
+     "reason": "safe_landing",
+     "ticks": 21,
+     "air_s": 4.582980182021856e-06
+    },
+    {
+     "seed": 6002,
+     "result": "win",
+     "reason": "safe_landing",
+     "ticks": 21,
+     "air_s": 4.208995960652828e-06
+    },
+    {
+     "seed": 6003,
+     "result": "win",
+     "reason": "safe_landing",
+     "ticks": 21,
+     "air_s": 3.916997229680419e-06
+    },
+    {
+     "seed": 6004,
+     "result": "win",
+     "reason": "safe_landing",
+     "ticks": 21,
+     "air_s": 4.089000867679715e-06
+    },
+    {
+     "seed": 6005,
+     "result": "win",
+     "reason": "safe_landing",
+     "ticks": 21,
+     "air_s": 3.7879799492657185e-06
+    },
+    {
+     "seed": 6006,
+     "result": "win",
+     "reason": "safe_landing",
+     "ticks": 21,
+     "air_s": 3.6259880289435387e-06
+    },
+    {
+     "seed": 6007,
+     "result": "win",
+     "reason": "safe_landing",
+     "ticks": 21,
+     "air_s": 4.169967724010348e-06
+    },
+    {
+     "seed": 6008,
+     "result": "win",
+     "reason": "safe_landing",
+     "ticks": 21,
+     "air_s": 3.8320140447467566e-06
+    },
+    {
+     "seed": 6009,
+     "result": "win",
+     "reason": "safe_landing",
+     "ticks": 22,
+     "air_s": 4.92100662086159e-06
+    },
+    {
+     "seed": 6010,
+     "result": "win",
+     "reason": "safe_landing",
+     "ticks": 21,
+     "air_s": 4.043016815558076e-06
+    },
+    {
+     "seed": 6011,
+     "result": "win",
+     "reason": "safe_landing",
+     "ticks": 22,
+     "air_s": 4.377012373879552e-06
+    },
+    {
+     "seed": 6012,
+     "result": "win",
+     "reason": "safe_landing",
+     "ticks": 21,
+     "air_s": 3.7910067476332188e-06
+    },
+    {
+     "seed": 6013,
+     "result": "win",
+     "reason": "safe_landing",
+     "ticks": 21,
+     "air_s": 3.7500285543501377e-06
+    },
+    {
+     "seed": 6014,
+     "result": "win",
+     "reason": "safe_landing",
+     "ticks": 22,
+     "air_s": 3.7509744288399816e-06
+    },
+    {
+     "seed": 6015,
+     "result": "win",
+     "reason": "safe_landing",
+     "ticks": 21,
+     "air_s": 3.830005880445242e-06
+    },
+    {
+     "seed": 6016,
+     "result": "win",
+     "reason": "safe_landing",
+     "ticks": 21,
+     "air_s": 3.8760044844821095e-06
+    },
+    {
+     "seed": 6017,
+     "result": "win",
+     "reason": "safe_landing",
+     "ticks": 21,
+     "air_s": 3.623019438236952e-06
+    },
+    {
+     "seed": 6018,
+     "result": "win",
+     "reason": "safe_landing",
+     "ticks": 21,
+     "air_s": 3.629014827311039e-06
+    },
+    {
+     "seed": 6019,
+     "result": "win",
+     "reason": "safe_landing",
+     "ticks": 21,
+     "air_s": 4.1239982238039374e-06
+    }
+   ]
+  },
+  {
+   "player": "gemini:gemini-flash-lite-latest:cot",
+   "model_version": "gemini-3.5-flash-lite",
+   "decisions": 359,
+   "jumps": 20,
+   "win_rate": 0.75,
+   "move_acc": 0.8579387186629527,
+   "open_acc": 0.9944289693593314,
+   "parsed_rate": 0.9916434540389972,
+   "retries_per_decision": 0.5097493036211699,
+   "wall_ms_mean": 3707.69109132037,
+   "latency_ms_mean": 835.8100395730984,
+   "latency_ms_p50": 808.7959999975283,
+   "latency_ms_p95": 1138.0923749966314,
+   "seconds_per_jump": 15.002790210337116,
+   "rows_fallen_while_thinking": 8.358100395730984,
+   "tokens_in_per_decision": 626.7103064066853,
+   "tokens_out_per_decision": 72.70194986072423,
+   "usd_per_1000_decisions": 0.26573050139275767,
+   "usd_per_jump": 0.0047698625,
+   "price_per_mtok": {
+    "in": 0.25,
+    "out": 1.5
+   },
+   "jumps_detail": [
+    {
+     "seed": 6000,
+     "result": "win",
+     "reason": "safe_landing",
+     "ticks": 21,
+     "air_s": 17.684551751051913
+    },
+    {
+     "seed": 6001,
+     "result": "win",
+     "reason": "safe_landing",
+     "ticks": 21,
+     "air_s": 18.397883747995365
+    },
+    {
+     "seed": 6002,
+     "result": "lose",
+     "reason": "hit_B",
+     "ticks": 11,
+     "air_s": 9.803924415973597
+    },
+    {
+     "seed": 6003,
+     "result": "win",
+     "reason": "safe_landing",
+     "ticks": 21,
+     "air_s": 18.54934062695247
+    },
+    {
+     "seed": 6004,
+     "result": "win",
+     "reason": "safe_landing",
+     "ticks": 21,
+     "air_s": 18.603760537997005
+    },
+    {
+     "seed": 6005,
+     "result": "lose",
+     "reason": "hit_P",
+     "ticks": 9,
+     "air_s": 8.168752916972153
+    },
+    {
+     "seed": 6006,
+     "result": "lose",
+     "reason": "hit_B",
+     "ticks": 10,
+     "air_s": 8.077867334985058
+    },
+    {
+     "seed": 6007,
+     "result": "win",
+     "reason": "safe_landing",
+     "ticks": 21,
+     "air_s": 17.451960459002294
+    },
+    {
+     "seed": 6008,
+     "result": "win",
+     "reason": "safe_landing",
+     "ticks": 21,
+     "air_s": 19.68592846102547
+    },
+    {
+     "seed": 6009,
+     "result": "win",
+     "reason": "safe_landing",
+     "ticks": 22,
+     "air_s": 18.843043205939466
+    },
+    {
+     "seed": 6010,
+     "result": "win",
+     "reason": "safe_landing",
+     "ticks": 21,
+     "air_s": 18.411060207989067
+    },
+    {
+     "seed": 6011,
+     "result": "lose",
+     "reason": "hit_B",
+     "ticks": 8,
+     "air_s": 6.8302525829931255
+    },
+    {
+     "seed": 6012,
+     "result": "win",
+     "reason": "safe_landing",
+     "ticks": 23,
+     "air_s": 17.839272834942676
+    },
+    {
+     "seed": 6013,
+     "result": "win",
+     "reason": "safe_landing",
+     "ticks": 21,
+     "air_s": 17.54633141301747
+    },
+    {
+     "seed": 6014,
+     "result": "win",
+     "reason": "safe_landing",
+     "ticks": 21,
+     "air_s": 17.162564000987913
+    },
+    {
+     "seed": 6015,
+     "result": "win",
+     "reason": "safe_landing",
+     "ticks": 21,
+     "air_s": 14.862822622948443
+    },
+    {
+     "seed": 6016,
+     "result": "win",
+     "reason": "safe_landing",
+     "ticks": 21,
+     "air_s": 16.040248125966173
+    },
+    {
+     "seed": 6017,
+     "result": "win",
+     "reason": "safe_landing",
+     "ticks": 21,
+     "air_s": 17.004623709013686
+    },
+    {
+     "seed": 6018,
+     "result": "lose",
+     "reason": "hit_A",
+     "ticks": 3,
+     "air_s": 2.3584794160124147
+    },
+    {
+     "seed": 6019,
+     "result": "win",
+     "reason": "safe_landing",
+     "ticks": 21,
+     "air_s": 16.733135834976565
+    }
+   ]
+  }
+ ]
+}

@@ -179,7 +179,14 @@ tokens) changed everything: **move 0.70, open 1.00, at 896 ms per decision**.
 "Minimal" thinking on the 3.1 lite model did nothing (0.37). The flagship
 3.8-flash with thinking "low" took 27 s per decision in a two-call probe
 (`results/gemini-probes.md`), which at one row per 100 ms is 270 rows of free
-fall. The larger variants were not measured further: Gemini was paused.
+fall. The larger variants were not measured further.
+
+**Update, Oct 6.** The chain-of-thought race was finally run (`results/race-gemini-cot.md`,
+20 jumps, seeds 6000-6019): Gemini flash-lite with a visible analysis field wins **15 of 20**
+(move agreement 0.86, open 0.99) at 809 ms p50 and 1.1 s p95. So the 0/10 above is a
+statement about the bare prompt, not about Gemini: thinking out loud is what makes it
+competitive. It is still 14x slower than Kev (809 vs 56 ms), uses 627 tokens in and 73 out per
+decision, and had 0.51 retries per decision on the free tier.
 
 The free tier also matters for the story: 44% of lite decisions needed a
 retry, so the wall time per decision was 2.5 s.
@@ -255,11 +262,10 @@ takes **56 ms median** through Kev's MLX server, p95 84 ms,
 1.3 s for a whole jump. The released model is the same speed
 (56 ms): fine-tuning changes the answers, not the cost. At Jev's
 list price that is $0.0075 per 1,000 decisions; locally it is
-electricity. The Gemini side of the race was paused at Marvin's request
-after the free-tier numbers in §7; those stand as measured: 745 ms per
-decision and 0 of 10 jumps with the bare prompt, 0.70 move accuracy at
-about 900 ms with a visible chain of thought, 27 s with the flagship's
-thinking on.
+electricity. The Gemini numbers are in §7 and §13:
+745 ms per decision and 0 of 10 jumps with the bare prompt; with a visible
+chain of thought 0.70 move accuracy on 60 states and 15 of 20 live jumps at
+809 ms; 27 s with the flagship's thinking on (one successful call).
 
 Local race, 20 fresh seeds: oracle 20/20, released Kev 0/20, final 20/20.
 
@@ -278,5 +284,52 @@ Local race, 20 fresh seeds: oracle 20/20, released Kev 0/20, final 20/20.
   fails, because `O` looks like a hole. Say which one you tested and why.
 - An LLM can play this, but only by thinking, and thinking is what you pay
   for in time and tokens. The decision model's job is to not need it:
-  56 ms versus 900 ms to 27 s, at a hundredth of the price.
+  56 ms versus 750-900 ms (Gemini flash-lite) with 15 of 20 jumps won
+  by chain of thought. List price per 1,000 decisions: Kev $0.0075 (priced at
+  Jev's rate; free locally), Gemini $0.07 with the bare prompt and $0.27 with
+  chain of thought, i.e. 9x to 35x more. (Earlier drafts said "a hundredth of
+  the price"; the measured ratio is not 100x.)
+- Do not read "decision model" as "good at everything": Jev, the hosted
+  original, scores 0.34 on `move` zero-shot (§13).
 
+## 13. Round two: Jev and Gemini chain of thought, run live (Oct 6)
+
+Two gaps were left open: Gemini's chain-of-thought race, and Jev itself. Both were
+run on the same questions and the same states as Kev, with no prompt tuning.
+
+**Jev (`jev-1.13.0`, hosted, zero-shot)**, `scripts/jev_test.py`, 2,000 held-out
+states and 20 live jumps on seeds 6000-6019, about $0.04 in total at list price:
+
+| | released Kev | **Jev** | fine-tuned Kev |
+|---|---|---|---|
+| move accuracy | 0.554 | **0.343** | 0.9975 |
+| open accuracy | 0.467 | **0.9485** | 0.999 |
+| Brier (overall) | 0.566 | 0.353 | 0.003 |
+| ECE | 0.117 | 0.062 | 0.0017 |
+| jumps won (seeds 6000-6019) | 0/20 | 3/20 | 20/20 |
+| latency per decision, median | 56 ms (local) | 176 ms (remote) | 56 ms (local) |
+
+Jev gets `open` almost right and `move` below the always-stay rate (0.554).
+Its `open` mistakes are all the same kind: all 94 of its false opens are at 1,000 m
+or lower with something deadly directly below, and it said open on 94 of those
+100 states, which is exactly the case the oracle's "cell below must be clear"
+clause covers. Its `move` errors are mostly over-dodging: it predicts `stay` on only 7% of
+states (true share 55%) and moves on 90% of the 1,108 states where the right answer is to
+stay (992 of them). When a dodge really is needed (892 states) it picks the wrong side 33% of
+the time and stays 3% of the time (confusion matrix in `results/jev-eval-2000.json`). The run was repeated once: 0.3375 and 0.343 move
+accuracy, so this is not noise. Read it as "zero-shot, with our wording, on a
+character grid", not as a verdict on Jev: TypeSafe's own docs list literal reading,
+large irrelevant state and numbers among its failure modes, and Red Hat found Jev's
+accuracy moves with policy wording. A prompt-tuned run was not done.
+
+Latency is not like for like: Kev ran on the same Mac with an idle GPU, Jev through the
+network. Jev billed 474 input tokens per request (its own tokenizer; Kev's is 179), so
+at its list price a decision costs $0.020 per 1,000 decisions, not the $0.0075 we use for
+Kev.
+
+**Gemini flash-lite with visible chain of thought**, 20 live jumps on seeds 6000-6019:
+15 wins, move agreement 0.86, open 0.99, 809 ms p50. Details in §7 and
+`results/race-gemini-cot.md`.
+
+GIFs on seeds 7000-7002: `results/gifs/jev.gif` (loses all three) and
+`results/gifs/gemini-cot.gif` (wins two of three).

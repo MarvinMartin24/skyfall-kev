@@ -134,6 +134,17 @@ def main():
             r = ask(url, w.render()); pr = probs(r)
             return {"action": {"move": max(pr["move"], key=pr["move"].get), "open": pr["open"] >= 0.5}, "probs": pr,
                     "latency_ms": r.get("latency_ms", r["_client_ms"]), "tokens": f"tokens {r.get('usage', {}).get('input_tokens', '?')} in, one forward pass"}
+    elif a.player == "jev":
+        # TypeSafe's hosted Jev: same /v1/systemone request as Kev; key is JEV_API_KEY in .env, never printed
+        from model.client import ask, probs
+        from model.llm_policy import load_dotenv
+        load_dotenv()
+        os.environ["KEV_API_KEY"] = os.environ.get("JEV_API_KEY", "")
+        who = a.label or "Jev (jev-latest, hosted API)"
+        def decide(w):
+            r = ask("https://api.typesafe.ai", w.render(), model="jev-latest"); pr = probs(r)
+            return {"action": {"move": max(pr["move"], key=pr["move"].get), "open": pr["open"] >= 0.5}, "probs": pr,
+                    "latency_ms": r["_client_ms"], "tokens": f"tokens {r.get('usage', {}).get('input_tokens', '?')} in, served by {r.get('model', '?')}"}
     else:
         from model.llm_policy import GeminiPolicy
         gp = GeminiPolicy(a.gemini_model, thinking=None, prompt=a.prompt)

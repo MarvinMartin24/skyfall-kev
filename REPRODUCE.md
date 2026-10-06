@@ -132,6 +132,26 @@ python3 scripts/make_table.py                                  # results/table.m
 .venv-wandb/bin/python scripts/montage.py                      # seed 7000 across training, from the per-snapshot GIFs
 ```
 
+## 8. Hosted competitors (optional, needs keys, costs cents)
+
+Put `GEMINI_API_KEY` and `JEV_API_KEY` in `.env` (gitignored; `.env.example` has the names).
+Generate the held-out states first if you have not (`python3 -m data.generate --train 20000 --eval 2000`).
+
+```bash
+python3 scripts/jev_test.py smoke                         # 3 calls: confirms the key and shows the response shape
+python3 scripts/jev_test.py eval --n 2000 --max_usd 1     # results/jev-eval-2000.json (+ jev-eval-predictions.jsonl, gitignored)
+python3 scripts/jev_test.py race --episodes 20 --seed 6000
+python3 -m model.bench --players oracle,gemini:gemini-flash-lite-latest --gemini_prompt cot --gemini_thinking none --episodes 20 --seed 6000 --out results/race-gemini-cot
+.venv-wandb/bin/python scripts/record_gif.py --player jev --seeds 7000,7001,7002 --out results/gifs/jev.gif
+.venv-wandb/bin/python scripts/record_gif.py --player gemini --prompt cot --seeds 7000,7001,7002 --out results/gifs/gemini-cot.gif
+python3 scripts/make_table.py
+```
+
+`jev_test.py` estimates spend from the `usage.input_tokens` in each response ($0.042 per million, TypeSafe's
+published list price) and stops at `--max_usd`; it aborts after five consecutive API failures, because the older
+Gemini path treats an API error as "stay, do not open" and would report a plausible-looking 0 wins. The run in
+this repo cost about $0.04 for Jev. Numbers vary slightly between runs (Jev's `move` accuracy was 0.3375 and 0.343 on two runs).
+
 ## Expected outputs
 
 Every number we got is in `results/table.md`, `results/race-*.md`, `STORY.md`

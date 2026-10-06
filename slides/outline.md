@@ -52,9 +52,9 @@ Live: `skyfall.py --policy model --fps 2`. Table: released vs final vs oracle (m
 "It applies 'any other letter is deadly' to letters it never saw. It also learned that round hollow glyphs look like empty cells. We picked the one surprise symbol that looks like a hole."
 
 ### 13. Why this architecture exists, and what it is not
-Latency per decision (same Mac, same states): fine-tuned Kev vs Gemini flash-lite vs Gemini with thinking; tokens and $ per 1,000 decisions; "rows fallen while thinking". Numbers: `results/table.md`.
+Latency per decision: fine-tuned Kev (56 ms, local) vs Gemini flash-lite bare (745 ms, 0/10) vs Gemini with visible chain of thought (809 ms, 15/20) vs hosted Jev (176 ms incl. network, 3/20, move 0.34 zero-shot); tokens and $ per 1,000 decisions; "rows fallen while thinking". Numbers: `results/table.md`. GIFs: `results/gifs/jev.gif`, `results/gifs/gemini-cot.gif`.
 Caveats: a tiny CNN solves this grid; imitation not RL; Kev ≠ Jev; option-order sensitivity exists.
 "One forward pass versus a decoding loop. The honest caveats are on the slide so nobody has to raise them."
 
 ### Backup
-FAQ.md; EXPLAINER.md §2–4; `results/final-confusion.txt` (the two remaining errors); the free-tier story (44% of Gemini decisions needed a retry).
+FAQ.md; EXPLAINER.md §2–4; `results/final-confusion.txt` (the two remaining errors); the free-tier story (44% of bare-prompt Gemini decisions needed a retry; 0.51 retries per decision with chain of thought); `STORY.md` §13 (Jev and Gemini chain of thought).

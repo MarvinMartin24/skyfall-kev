@@ -75,6 +75,19 @@ class imbalance you did not fix, and questions that need world knowledge the
 0.8B base does not have. Kev's repo reports a wide gap to Jev on MMLU-style
 questions; grid rules are not that.
 
+**Does the hosted Jev solve Skyfall zero-shot?**
+No. With our wording, zero-shot, `jev-1.13.0` gets `open` right 94.85% of the time but `move` only
+34.3% on the same 2,000 held-out states (always-stay would get 55.4%) and wins 3 of 20 jumps.
+All 94 of its false opens are at 1,000 m or lower with something deadly directly below. We did not
+tune its prompt, and TypeSafe's docs list literal reading and large irrelevant state as known weak
+spots, so this says little about Jev on ordinary text. Results: `results/jev-eval-2000.json`.
+
+**Can a general LLM play it?**
+With a visible one-sentence analysis before the answer, Gemini flash-lite wins 15 of 20 jumps (move
+agreement 0.86) at about 810 ms per decision. With a bare prompt it won 0 of 10. The cost is time and
+tokens: 627 in and 73 out per decision, 14x slower than Kev's 56 ms, about 35x the list price per
+1,000 decisions (`results/race-gemini-cot.md`).
+
 **Could the base model have done it with a better prompt?**
 The question text is the only prompt there is, and it is identical before
 and after fine-tuning. The before/after rows differ only in the LoRA and head

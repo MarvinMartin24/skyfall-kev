@@ -62,6 +62,22 @@ Released model on the same 2,000 states: move 0.554 / Brier 0.626, open 0.467 / 
 
 Gemini numbers (free tier, bare and chain-of-thought prompts) are in the race files below and in STORY.md §7.
 
+## Jev (hosted, jev-1.13.0), zero-shot, same 2,000 held-out states
+
+| | move | open | overall |
+|---|---|---|---|
+| accuracy | 0.3430 | 0.9485 | |
+| Brier | 0.6635 | 0.0422 | 0.3529 |
+| ECE | | | 0.0621 |
+
+Latency per decision: median 176 ms, p95 231 ms (remote API, network included). Input tokens per request: 474 (Jev's tokenizer). Run by `scripts/jev_test.py eval`; estimated spend $0.040.
+
+## Jev live race (20 jumps, seeds 6000-6019)
+
+| wins | win rate | decisions | move agreement | open agreement | latency p50 / p95 ms |
+|---|---|---|---|---|---|
+| 3 / 20 | 0.15 | 169 | 0.16 | 1.00 | 176 / 225 |
+
 ## race-base-vs-gemini-lite.md
 
 Latency is per decision (both questions). `seconds_per_jump` is the time the skydiver spends in the air if the sky waits for each decision. `rows_fallen_while_thinking` assumes a row every 100 ms. Kev tokens are priced at Jev list price ($0.042/M input, output free); Gemini at its list price. Accuracy is agreement with the oracle on the states actually visited.
@@ -82,6 +98,16 @@ Latency is per decision (both questions). `seconds_per_jump` is the time the sky
 | oracle | 1.00 | 1.00 | 1.00 | 0 | 0 | 0.0 | 0.0 | 0 | 0 | 0.0000 |
 | kev-released | 0.00 | 0.90 | 0.00 | 56 | 92 | 0.1 | 0.6 | 179 | 84 | 0.0075 |
 | kev-final | 1.00 | 1.00 | 1.00 | 56 | 84 | 1.3 | 0.6 | 179 | 70 | 0.0075 |
+
+
+## race-gemini-cot.md
+
+Latency is per decision (both questions). `seconds_per_jump` is the time the skydiver spends in the air if the sky waits for each decision. `rows_fallen_while_thinking` assumes a row every 100 ms. Kev tokens are priced at Jev list price ($0.042/M input, output free, as cited in Simon Willison's Sep 2026 write-up); Gemini at its list price. Accuracy is agreement with the oracle on the states actually visited.
+
+| player | win_rate | move_acc | open_acc | latency_ms_p50 | latency_ms_p95 | seconds_per_jump | rows_fallen_while_thinking | tokens_in_per_decision | tokens_out_per_decision | usd_per_1000_decisions |
+|---|---|---|---|---|---|---|---|---|---|---|
+| oracle | 1.00 | 1.00 | 1.00 | 0 | 0 | 0.0 | 0.0 | 0 | 0 | 0.0000 |
+| gemini:gemini-flash-lite-latest:cot | 0.75 | 0.86 | 0.99 | 809 | 1138 | 15.0 | 8.4 | 627 | 73 | 0.2657 |
 
 
 ## Gemini prompt variants (gemini-flash-lite-latest, thinking none, 60 held-out states)

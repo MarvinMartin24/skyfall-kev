@@ -1,0 +1,138 @@
+{
+ "episodes": 20,
+ "seeds": "6000-6019",
+ "wins": 3,
+ "win_rate": 0.15,
+ "decisions": 169,
+ "move_agreement": 0.15976331360946747,
+ "open_agreement": 1.0,
+ "latency_ms_median": 176.12108300090767,
+ "latency_ms_mean": 180.851863414313,
+ "latency_ms_p95": 225.02154199173674,
+ "served_by": [
+  "jev-1.13.0"
+ ],
+ "est_usd": 0.003364914,
+ "jumps": [
+  {
+   "seed": 6000,
+   "result": "lose",
+   "reason": "hit_A",
+   "ticks": 5
+  },
+  {
+   "seed": 6001,
+   "result": "lose",
+   "reason": "hit_P",
+   "ticks": 5
+  },
+  {
+   "seed": 6002,
+   "result": "lose",
+   "reason": "hit_P",
+   "ticks": 6
+  },
+  {
+   "seed": 6003,
+   "result": "win",
+   "reason": "safe_landing",
+   "ticks": 21
+  },
+  {
+   "seed": 6004,
+   "result": "lose",
+   "reason": "hit_B",
+   "ticks": 10
+  },
+  {
+   "seed": 6005,
+   "result": "lose",
+   "reason": "hit_P",
+   "ticks": 1
+  },
+  {
+   "seed": 6006,
+   "result": "lose",
+   "reason": "hit_A",
+   "ticks": 6
+  },
+  {
+   "seed": 6007,
+   "result": "lose",
+   "reason": "hit_B",
+   "ticks": 15
+  },
+  {
+   "seed": 6008,
+   "result": "win",
+   "reason": "safe_landing",
+   "ticks": 21
+  },
+  {
+   "seed": 6009,
+   "result": "lose",
+   "reason": "hit_P",
+   "ticks": 14
+  },
+  {
+   "seed": 6010,
+   "result": "lose",
+   "reason": "hit_A",
+   "ticks": 8
+  },
+  {
+   "seed": 6011,
+   "result": "lose",
+   "reason": "hit_P",
+   "ticks": 1
+  },
+  {
+   "seed": 6012,
+   "result": "lose",
+   "reason": "hit_P",
+   "ticks": 10
+  },
+  {
+   "seed": 6013,
+   "result": "lose",
+   "reason": "hit_B",
+   "ticks": 5
+  },
+  {
+   "seed": 6014,
+   "result": "lose",
+   "reason": "hit_A",
+   "ticks": 2
+  },
+  {
+   "seed": 6015,
+   "result": "lose",
+   "reason": "hit_P",
+   "ticks": 3
+  },
+  {
+   "seed": 6016,
+   "result": "lose",
+   "reason": "hit_A",
+   "ticks": 1
+  },
+  {
+   "seed": 6017,
+   "result": "lose",
+   "reason": "hit_A",
+   "ticks": 5
+  },
+  {
+   "seed": 6018,
+   "result": "win",
+   "reason": "safe_landing",
+   "ticks": 21
+  },
+  {
+   "seed": 6019,
+   "result": "lose",
+   "reason": "hit_A",
+   "ticks": 9
+  }
+ ]
+}
