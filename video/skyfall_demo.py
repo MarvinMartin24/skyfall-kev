@@ -68,7 +68,7 @@ class SkyfallDemo(Slides):
 
     # ---- GIF slots (filled in later by ffmpeg) ------------------------
     def gif_slot(self, name, width, center, speed=1.0):
-        ph = Rectangle(width=width, height=width * GIF_ASPECT, stroke_width=0, fill_color="#0f1117", fill_opacity=1).move_to([center[0], center[1], 0])
+        ph = Rectangle(width=width, height=width * GIF_ASPECT, stroke_width=0, fill_color=PANEL, fill_opacity=1).move_to([center[0], center[1], 0])
         self.add(ph)
         slot = {"gif": name, "t0": float(self.renderer.time), "t1": None, "cx": center[0], "cy": center[1], "w": width, "speed": speed}
         self.slots.append(slot)
@@ -327,7 +327,7 @@ class SkyfallDemo(Slides):
         code = VGroup(*[Text(c.strip(), font="Menlo", font_size=20, color=WHITE).move_to([0, y0 - i * 0.6, 0]) for i, (c, _, _) in enumerate(rows)])
         for m in code:
             m.align_to([-6.3 if m.text.startswith('uv') else -5.9, 0, 0], LEFT)
-        panel = RoundedRectangle(corner_radius=0.12, width=13.4, height=4.5, color=GRAY_C, fill_color="#0f1117", fill_opacity=1, stroke_width=1.5).move_to([0, 0.05, 0])
+        panel = RoundedRectangle(corner_radius=0.12, width=13.4, height=4.5, color=GRAY_C, fill_color=PANEL, fill_opacity=1, stroke_width=1.5).move_to([0, 0.05, 0])
         self.play(FadeIn(panel))
         notes = VGroup()
         for i, ((c, n, col), m) in enumerate(zip(rows, code)):

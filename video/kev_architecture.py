@@ -9,29 +9,30 @@ Shapes (hidden size 1024, 256-d pointer space, scale 1/sqrt(256)) follow EXPLAIN
 """
 from common import *
 
-LEVELS = ["1 star", "2 stars", "3 stars", "4 stars", "5 stars"]
+LEVELS = ["1 star", "2 stars", "3 stars", "4 stars", "5 stars"]      # the Score example
 RAW = [-3.0, -1.2, 0.5, 3.0, 1.0]
+TEAMS = ["billing", "technical", "sales", "other"]                    # the main Choice example: ticket routing
+TEAM_RAW = [4.2, -0.6, 0.3, -1.0]                                     # made-up logits; gold = billing
 
-# the Yelp rating example, one row per segment of the single token sequence
+# a support-ticket routing question (made-up ticket), one row per segment of the single token sequence
 SEQ = [
-    ("<state> Pregnant as a first time mom I found...", STATE),
-    ("<q> How many stars did this reviewer give?", QUESTION),
-    ("<opt> 1 star: terrible experience </opt>", OPTION),
-    ("<opt> 2 stars: poor </opt>", OPTION),
-    ("<opt> 3 stars: average </opt>", OPTION),
-    ("<opt> 4 stars: good </opt>", OPTION),
-    ("<opt> 5 stars: excellent </opt>", OPTION),
+    ("<state> I was charged twice for my March subscription.", STATE),
+    ("<q> Which team should handle this ticket?", QUESTION),
+    ("<opt> billing: payments, invoices, refunds </opt>", OPTION),
+    ("<opt> technical: bugs, errors, outages </opt>", OPTION),
+    ("<opt> sales: pricing, plans, upgrades </opt>", OPTION),
+    ("<opt> other: anything else </opt>", OPTION),
     ("<decide>", DECIDE),
 ]
-PROBS = list(softmax(np.array(RAW) / T))
+PROBS = list(softmax(np.array(TEAM_RAW) / T))
 
 # name, text fed to the model (abbreviated), options, raw logits (made up), gold index (made up), note
 EXAMPLES = [
-    ("Choice", "<state> When will my card be here?  <q> Which banking intent best describes this message?  <opt> card_arrival </opt> ... <decide>",
-     ["card_arrival", "delivery_estimate", "activate_card", "not_working"], [3.1, 5.4, -0.8, 0.2], 1, None),
+    ("Choice", "<state> I was charged twice for my March subscription.  <q> Which team should handle this ticket?  <opt> billing </opt> ... <decide>",
+     TEAMS, TEAM_RAW, 0, None),
     ("Noul", "<state> A venomoid is a venomous snake that has undergone a surgical procedure ...  <q> can you remove venom glands from a snake?  <opt> no </opt> <opt> yes </opt> <decide>",
      ["no", "yes"], [-1.9, 2.4], 1, "API returns only p(yes)"),
-    ("Score", "<state> Pregnant as a first time mom I found baby stores extremely overwhelming ...  <q> How many stars did this reviewer give?  <opt> 1 star </opt> ... <opt> 5 stars </opt> <decide>",
+    ("Score", "<state> Great food, but we waited 45 minutes for a table.  <q> How many stars did this reviewer give?  <opt> 1 star </opt> ... <opt> 5 stars </opt> <decide>",
      LEVELS, RAW, 2, "expected level index = sum(i * p_i)"),
 ]
 
@@ -61,7 +62,7 @@ class KevDeepDive(Slides):
     def frame_problem(self):
         self.title("Generating an answer vs reading one off")
         left_lbl = Text("LLM: decode token by token, then parse", font_size=22, color=YELLOW).move_to([-3.4, 1.8, 0])
-        toks = VGroup(*[box(s, GRAY_B, 0.9, font=18) for s in ['{', '"stars"', ':', '4', '}']]).arrange(RIGHT, buff=0.1).move_to([-3.4, 0.6, 0])
+        toks = VGroup(*[box(s, GRAY_B, 0.9, font=18) for s in ['{', '"team"', ':', '"billing"', '}']]).arrange(RIGHT, buff=0.1).move_to([-3.4, 0.6, 0])
         left_note = Text("5 sequential forward passes\n+ a parser you must trust", font_size=20, color=GRAY_B).move_to([-3.4, -1.0, 0])
         right_lbl = Text("Decision model: one pass", font_size=22, color=GREEN).move_to([3.2, 1.8, 0])
         one_pass = box("1 forward pass", GREEN, 2.8, height=0.6, font=20).move_to([3.2, 0.8, 0])
@@ -99,14 +100,14 @@ class KevDeepDive(Slides):
         self.play(GrowArrow(Arrow(model.get_right(), hs.get_left(), buff=0.1)), LaggedStart(*[FadeIn(h) for h in hs], lag_ratio=0.15), run_time=1.8)
         self.say("Output: one 1024-d hidden vector per token. Matrix H has shape [L, 1024].", wait=1.5)
         dim = [self.rows[0], self.rows[1], hs[0], hs[1]]
-        picks = VGroup(*[SurroundingRectangle(hs[i], color=OPTION if i < 7 else DECIDE, buff=0.05) for i in range(2, 8)])
+        picks = VGroup(*[SurroundingRectangle(hs[i], color=OPTION if i < len(SEQ) - 1 else DECIDE, buff=0.05) for i in range(2, len(SEQ))])
         self.play(*[m.animate.set_opacity(0.15) for m in dim], Create(picks), run_time=1.2)
         self.say("Only K+1 are used: one at each </opt> (the options) and one at <decide> (the question).", wait=2.5)
 
     # ---- 4. pointer head ---------------------------------------------------
     def frame_pointer_head(self):
         self.title("Pointer head: which option does the decision point at?")
-        n = len(LEVELS)
+        n = len(TEAMS)
         ys = [1.8 - i * 0.6 for i in range(n)]
         h_opts = VGroup(*[box(f"h_opt[{i}]", OPTION, 1.5, fill=0.3) for i in range(n)])
         keys = VGroup(*[box(f"k{i}", OPTION, 1.0, fill=0.5) for i in range(n)])
@@ -121,9 +122,9 @@ class KevDeepDive(Slides):
         self.play(FadeIn(wk), FadeIn(wq))
         self.play(FadeIn(keys), FadeIn(query), run_time=1.0)
         self.say("Two linear maps into a shared 256-d space: a key per option, one query for the question.", wait=1.5)
-        labels = VGroup(*[Text(LEVELS[i], font_size=16).move_to([1.0, ys[i], 0]) for i in range(n)])
+        labels = VGroup(*[Text(TEAMS[i], font_size=16).move_to([1.0, ys[i], 0]) for i in range(n)])
         dot = Text("k_i . q / sqrt(256)", font_size=16, color=DECIDE).move_to([-0.4, 2.45, 0])
-        raw_bars = bars(RAW, [4.2, 1.8], 0.5, TEAL)
+        raw_bars = bars(TEAM_RAW, [4.2, 1.8], 0.5, TEAL)
         self.play(FadeIn(labels), FadeIn(dot))
         self.play(LaggedStart(*[FadeIn(b) for b in raw_bars], lag_ratio=0.2), run_time=1.5)
         self.say("Dot product per option gives one raw logit each. K options means K logits (illustrative numbers).", wait=2.5)
@@ -241,7 +242,7 @@ class KevDeepDive(Slides):
         formula.move_to(panel)
         panel.move_to([0, -2.5, 0])
         self.play(FadeIn(panel))
-        gold_txt = "(gold label made up for this slide)" if name == "Score" else ""
+        gold_txt = "(logits and gold label are made up)" if name in ("Choice", "Score") else "(logits made up; BoolQ example)"
         verdict = "Right and confident: small loss." if pred == gold else "Confident and wrong: large loss."
         self.say(f"{verdict} {gold_txt}".strip(), wait=2.5)
 
@@ -306,7 +307,7 @@ class KevDeepDive(Slides):
         tr = ValueTracker(1.0)
         dot = always_redraw(lambda: Dot(ax.c2p(tr.get_value(), float(np.interp(tr.get_value(), grid, nll))), color=RED))
         readout = always_redraw(lambda: Text(f"T = {tr.get_value():.2f}    NLL = {float(np.interp(tr.get_value(), grid, nll)):.3f}", font_size=20).move_to([-3.3, -2.55, 0]))
-        names = ["card_arrival", "delivery_estimate", "activate_card", "not_working"]
+        names = TEAMS
         raw4 = EXAMPLES[0][3]
         rows_y = [1.3 - i * 0.6 for i in range(4)]
         lab4 = VGroup(*[Text(o, font_size=16).move_to([3.3, y, 0], aligned_edge=RIGHT) for o, y in zip(names, rows_y)])

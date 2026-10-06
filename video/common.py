@@ -11,6 +11,8 @@ from manim import *
 PACE = float(os.environ.get("PACE", "1.5"))
 STATE, QUESTION, OPTION, DECIDE = BLUE_C, GREEN_C, ORANGE, RED_C
 SYM_COL = {".": GRAY_D, "Y": GREEN, "B": YELLOW, "P": PINK, "A": RED, "C": WHITE, "O": TEAL}
+BG = "#14161c"        # video background (dark navy)
+PANEL = "#0f1117"     # code panel / GIF placeholder
 T = 2.35   # calibration temperature of the released Kev-0.8B (head.pt)
 
 
@@ -81,7 +83,7 @@ class Slides(Scene):
         return super().wait(duration * PACE, *a, **kw)
 
     def setup(self):
-        self.camera.background_color = "#14161c"
+        self.camera.background_color = BG
         self.cap = None
         self.ttl = None
 
